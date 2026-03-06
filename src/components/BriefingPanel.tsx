@@ -1,91 +1,173 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useMode } from '@/lib/modeContext';
 import { sampleBriefingQuestions } from '@/lib/mockData';
+import { toast } from 'sonner';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const mockResponses: Record<string, string> = {
-  'Where should Montgomery prioritize public safety resources?': `## Public Safety Resource Priority Analysis
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-briefing`;
 
-### Summary
-Based on analysis of 911 call data, 311 service requests, and district intelligence scores, Montgomery should prioritize public safety resources in **Districts 1, 2, and 5**.
+async function streamBriefing({
+  messages,
+  mode,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Message[];
+  mode: string;
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (error: string) => void;
+}) {
+  const resp = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({ messages, mode }),
+  });
 
-### Key Findings
-- **District 5 (Chisholm)** shows the highest convergence of risk signals: HIGH public safety pressure, RISING emergency demand (+18% MoM), and DECLINING citizen confidence
-- **District 1 (Downtown Core)** has elevated emergency call volumes correlating with high economic activity zones — suggesting resource strain during business hours
-- **District 2 (Capitol Heights)** shows RISING emergency demand with declining community confidence metrics
+  if (!resp.ok) {
+    if (resp.status === 429) {
+      onError("Rate limit exceeded. Please wait a moment and try again.");
+      return;
+    }
+    if (resp.status === 402) {
+      onError("AI usage limit reached. Please add credits to continue.");
+      return;
+    }
+    const errData = await resp.json().catch(() => ({}));
+    onError(errData.error || "Failed to get AI response");
+    return;
+  }
 
-### Supporting Data Signals
-- 911 call volume in District 5: 3,100 calls/month (+18% MoM)
-- District 1 emergency response time: 5.8 min (above 4.2 min city average)
-- Unresolved 311 complaints in priority districts: 847 active requests
+  if (!resp.body) {
+    onError("No response stream");
+    return;
+  }
 
-### Recommended Actions
-1. Increase patrol allocation to District 5 during peak hours (6PM-2AM)
-2. Deploy community liaison officers in Districts 2 and 5
-3. Establish a joint operations center for Districts 1-2 coordination
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let textBuffer = "";
+  let streamDone = false;
 
-### Confidence Statement
-**89% confidence** — Analysis based on 18,432 emergency calls, 2,847 service requests, and 9-district intelligence scoring model.`,
+  while (!streamDone) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    textBuffer += decoder.decode(value, { stream: true });
 
-  'What issues are most common in my district?': `## Community Issues Overview
+    let newlineIndex: number;
+    while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+      let line = textBuffer.slice(0, newlineIndex);
+      textBuffer = textBuffer.slice(newlineIndex + 1);
 
-### Summary
-The most common issues reported across Montgomery neighborhoods involve **road infrastructure, street lighting, and water/sewer services**. Here's what residents are experiencing.
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (line.startsWith(":") || line.trim() === "") continue;
+      if (!line.startsWith("data: ")) continue;
 
-### Key Findings
-- **Potholes & Road Damage** is the #1 reported issue citywide (487 reports, 17.1% of all requests)
-- **Street Lighting** concerns rank second (412 reports), particularly in Districts 2, 5, and 8
-- **Water & Sewer** issues are concentrated in older infrastructure zones (Districts 1, 5, 8)
+      const jsonStr = line.slice(6).trim();
+      if (jsonStr === "[DONE]") {
+        streamDone = true;
+        break;
+      }
 
-### What This Means for You
-Your neighborhood's most pressing concerns depend on your district, but city-wide trends show:
-- Road conditions are being addressed with a 73.4% resolution rate
-- Average resolution time has improved by 12% to 6.3 days
-- The city has resolved 1,923 community issues in the last 30 days
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) onDelta(content);
+      } catch {
+        textBuffer = line + "\n" + textBuffer;
+        break;
+      }
+    }
+  }
 
-### How the City is Responding
-- Road repair crews have been expanded in high-priority districts
-- Street lighting upgrades are scheduled for Districts 2 and 5
-- A new water infrastructure assessment program has begun
+  // Flush remaining
+  if (textBuffer.trim()) {
+    for (let raw of textBuffer.split("\n")) {
+      if (!raw) continue;
+      if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+      if (raw.startsWith(":") || raw.trim() === "") continue;
+      if (!raw.startsWith("data: ")) continue;
+      const jsonStr = raw.slice(6).trim();
+      if (jsonStr === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) onDelta(content);
+      } catch { /* ignore */ }
+    }
+  }
 
-### Confidence Statement
-Based on 2,847 active service requests and historical resolution data.`,
-};
+  onDone();
+}
 
 export function BriefingPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const { mode, isLeadership } = useMode();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const questions = isLeadership ? sampleBriefingQuestions.leadership : sampleBriefingQuestions.citizen;
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
 
   const handleSend = async (text: string) => {
     if (!text.trim() || loading) return;
     const userMsg: Message = { role: 'user', content: text };
-    setMessages(prev => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setInput('');
     setLoading(true);
 
-    // Simulate AI response
-    await new Promise(r => setTimeout(r, 1500));
+    let assistantSoFar = "";
 
-    const response = mockResponses[text] || `## Analysis: ${text}\n\n### Summary\nBased on Montgomery's municipal datasets, here is the intelligence assessment for your query.\n\n### Key Findings\n- District-level analysis shows varying signal patterns across the 9 monitored zones\n- Current data indicates operational attention needed in Districts 1, 2, 5, and 8\n- Signal convergence detected between 311 complaint patterns and emergency demand trends\n\n### Supporting Signals\n- 2,847 active 311 service requests\n- 18,432 emergency calls in the last 30 days\n- 12,891 active business licenses citywide\n\n### Recommended Actions\n1. Review district-specific intelligence scores for detailed breakdown\n2. Cross-reference with the geospatial intelligence map for spatial patterns\n3. Monitor trend indicators for emerging pressure points\n\n### Confidence Statement\n**76% confidence** — Based on available municipal datasets and signal correlation analysis.`;
+    const upsertAssistant = (chunk: string) => {
+      assistantSoFar += chunk;
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
+        }
+        return [...prev, { role: "assistant", content: assistantSoFar }];
+      });
+    };
 
-    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    setLoading(false);
+    try {
+      await streamBriefing({
+        messages: newMessages,
+        mode,
+        onDelta: (chunk) => upsertAssistant(chunk),
+        onDone: () => setLoading(false),
+        onError: (error) => {
+          toast.error(error);
+          setLoading(false);
+        },
+      });
+    } catch (e) {
+      console.error("Briefing error:", e);
+      toast.error("Failed to connect to AI service");
+      setLoading(false);
+    }
   };
 
   return (
     <div className="glass-card flex flex-col h-[600px]">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="p-3 rounded-xl bg-primary/10 mb-4">
@@ -123,22 +205,23 @@ export function BriefingPanel() {
               className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}
             >
               {msg.role === 'assistant' && (
-                <div className="p-1.5 rounded-lg bg-primary/10 h-fit">
+                <div className="p-1.5 rounded-lg bg-primary/10 h-fit mt-1">
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
               )}
               <div className={`max-w-[80%] text-sm ${
                 msg.role === 'user'
                   ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5'
-                  : 'prose prose-sm prose-invert max-w-none'
+                  : ''
               }`}>
                 {msg.role === 'assistant' ? (
-                  <div className="text-xs leading-relaxed text-foreground/90 whitespace-pre-line" 
-                       dangerouslySetInnerHTML={{ __html: msg.content.replace(/## (.*)/g, '<h3 class="text-sm font-bold text-foreground mt-3 mb-1">$1</h3>').replace(/### (.*)/g, '<h4 class="text-xs font-semibold text-foreground mt-2 mb-1">$1</h4>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>').replace(/^- (.*)/gm, '<li class="ml-3 text-muted-foreground">$1</li>').replace(/^\d+\. (.*)/gm, '<li class="ml-3 text-muted-foreground list-decimal">$1</li>') }} />
+                  <div className="prose prose-sm prose-invert max-w-none text-foreground/90 [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-foreground [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-2 [&_h3]:mb-1 [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-muted-foreground [&_li]:text-xs [&_li]:text-muted-foreground [&_strong]:text-foreground [&_ul]:my-1 [&_ol]:my-1">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
                 ) : msg.content}
               </div>
               {msg.role === 'user' && (
-                <div className="p-1.5 rounded-lg bg-secondary h-fit">
+                <div className="p-1.5 rounded-lg bg-secondary h-fit mt-1">
                   <User className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
@@ -146,7 +229,7 @@ export function BriefingPanel() {
           ))}
         </AnimatePresence>
 
-        {loading && (
+        {loading && messages[messages.length - 1]?.role !== 'assistant' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-muted-foreground">
             <div className="p-1.5 rounded-lg bg-primary/10">
               <Bot className="h-4 w-4 text-primary" />

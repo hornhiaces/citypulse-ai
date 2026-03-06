@@ -1,1 +1,13 @@
 project_id = "zliaiwjmlznjdkxudtfh"
+
+[functions.ingest-dataset]
+verify_jwt = false
+
+[functions.compute-scores]
+verify_jwt = false
+
+[functions.generate-embeddings]
+verify_jwt = false
+
+[functions.ai-briefing]
+verify_jwt = false
