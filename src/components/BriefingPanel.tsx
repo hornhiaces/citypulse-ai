@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -110,7 +110,11 @@ async function streamBriefing({
   onDone();
 }
 
-export function BriefingPanel() {
+export interface BriefingPanelHandle {
+  sendMessage: (text: string) => void;
+}
+
+export const BriefingPanel = forwardRef<BriefingPanelHandle>(function BriefingPanel(_, ref) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,6 +167,8 @@ export function BriefingPanel() {
       setLoading(false);
     }
   };
+
+  useImperativeHandle(ref, () => ({ sendMessage: handleSend }));
 
   return (
     <div className="glass-card flex flex-col h-[600px]">
@@ -261,4 +267,4 @@ export function BriefingPanel() {
       </div>
     </div>
   );
-}
+});
