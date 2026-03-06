@@ -6,12 +6,55 @@ import { TrendChart } from '@/components/TrendChart';
 import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { DistrictEmergencyChart } from '@/components/DistrictEmergencyChart';
 import { useMode } from '@/lib/modeContext';
-import { executiveKpis, citizenKpis, districtScores, recommendations } from '@/lib/mockData';
+import { executiveKpis, citizenKpis } from '@/lib/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDistrictScores } from '@/services/districtService';
+import { fetchRecommendations } from '@/services/recommendationService';
+import { districtScores as fallbackDistricts, recommendations as fallbackRecs } from '@/lib/mockData';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
   const kpis = isLeadership ? executiveKpis : citizenKpis;
-  const priorityDistricts = districtScores.filter(d => d.publicSafetyPressure === 'HIGH' || d.emergencyDemand === 'RISING');
+
+  const { data: dbDistricts } = useQuery({
+    queryKey: ['district-scores'],
+    queryFn: fetchDistrictScores,
+  });
+
+  const { data: dbRecs } = useQuery({
+    queryKey: ['recommendations'],
+    queryFn: fetchRecommendations,
+  });
+
+  // Map DB rows to component format, fallback to mock
+  const districts = dbDistricts
+    ? dbDistricts.map(d => ({
+        district: d.district,
+        name: d.district_name,
+        publicSafetyPressure: (d.public_safety_pressure || 'MEDIUM') as any,
+        infrastructureStress: (d.infrastructure_stress || 'MEDIUM') as any,
+        emergencyDemand: (d.emergency_demand || 'STABLE') as any,
+        economicActivity: (d.economic_activity || 'MEDIUM') as any,
+        citizenConfidence: (d.citizen_confidence || 'STABLE') as any,
+        population: d.population || 0,
+        area: d.area || '',
+      }))
+    : fallbackDistricts;
+
+  const recommendations = dbRecs
+    ? dbRecs.map(r => ({
+        id: r.id,
+        priority: r.priority as 'critical' | 'high' | 'medium',
+        title: r.title,
+        description: r.description,
+        districts: r.districts || [],
+        signals: r.signals || [],
+        confidence: r.confidence || 0,
+        category: r.category || '',
+      }))
+    : fallbackRecs;
+
+  const priorityDistricts = districts.filter(d => d.publicSafetyPressure === 'HIGH' || d.emergencyDemand === 'RISING');
 
   return (
     <>
