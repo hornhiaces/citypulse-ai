@@ -15,7 +15,9 @@ const iconMap: Record<string, React.ElementType> = {
 export function KpiCard({ data, index }: { data: KpiData; index: number }) {
   const Icon = iconMap[data.icon] || ClipboardList;
   const TrendIcon = data.trend === 'up' ? TrendingUp : data.trend === 'down' ? TrendingDown : Minus;
-  const trendPositive = (data.trend === 'down' && data.label.includes('Response')) || (data.trend === 'up' && !data.label.includes('Active 311') && !data.label.includes('Open'));
+  const downIsGood = data.label.includes('Response') || data.label.includes('Time') || data.label.includes('Processing');
+  const upIsBad = data.label.includes('Active 311') || data.label.includes('Open') || data.label.includes('Incidents');
+  const trendPositive = (data.trend === 'down' && downIsGood) || (data.trend === 'up' && !upIsBad);
 
   return (
     <motion.div

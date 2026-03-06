@@ -1,10 +1,12 @@
+import { useRef } from 'react';
 import { PageHeader } from '@/components/PageHeader';
-import { BriefingPanel } from '@/components/BriefingPanel';
+import { BriefingPanel, type BriefingPanelHandle } from '@/components/BriefingPanel';
 import { useMode } from '@/lib/modeContext';
 import { sampleBriefingQuestions } from '@/lib/mockData';
 
 export default function BriefingPage() {
   const { isLeadership } = useMode();
+  const briefingRef = useRef<BriefingPanelHandle>(null);
 
   return (
     <>
@@ -16,16 +18,20 @@ export default function BriefingPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3">
-          <BriefingPanel />
+          <BriefingPanel ref={briefingRef} />
         </div>
         <div className="space-y-3">
           <div className="glass-card p-4">
             <h3 className="text-xs font-semibold text-foreground mb-3">Suggested Questions</h3>
             <div className="space-y-2">
               {(isLeadership ? sampleBriefingQuestions.leadership : sampleBriefingQuestions.citizen).map((q) => (
-                <p key={q} className="text-[11px] text-muted-foreground p-2 rounded-md bg-secondary/30 border border-border/30 cursor-pointer hover:border-primary/30 transition-colors">
+                <button
+                  key={q}
+                  onClick={() => briefingRef.current?.sendMessage(q)}
+                  className="w-full text-left text-[11px] text-muted-foreground p-2 rounded-md bg-secondary/30 border border-border/30 cursor-pointer hover:border-primary/30 hover:text-foreground transition-colors"
+                >
                   {q}
-                </p>
+                </button>
               ))}
             </div>
           </div>
