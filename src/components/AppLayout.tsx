@@ -32,16 +32,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <button onClick={() => setSidebarOpen(true)} className="p-2 text-muted-foreground hover:text-foreground">
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
           <span className="font-semibold text-sm">SafeCity AI</span>
-        </div>
+        </Link>
         <ModeToggle />
       </header>
 
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-14 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
+        <Link to="/" className="h-14 flex items-center gap-2.5 px-5 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors">
           <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <Activity className="h-4 w-4 text-primary" />
           </div>
@@ -52,7 +52,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto p-1 text-muted-foreground">
             <X className="h-4 w-4" />
           </button>
-        </div>
+        </Link>
 
         <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
