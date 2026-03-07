@@ -52,7 +52,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto p-1 text-muted-foreground">
             <X className="h-4 w-4" />
           </button>
-        </div>
+        </Link>
 
         <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
