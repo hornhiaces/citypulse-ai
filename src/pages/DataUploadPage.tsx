@@ -15,6 +15,7 @@ interface FileUpload {
   id: string;
   file: File;
   detectedType: DatasetType | null;
+  detectionDone: boolean;
   status: 'queued' | 'parsing' | 'uploading' | 'done' | 'error';
   progress: number;
   totalRows: number;
