@@ -80,7 +80,7 @@ export default function DataUploadPage() {
         complete: (results) => {
           const headers = results.meta.fields || [];
           const detected = detectDatasetFromHeaders(headers);
-          setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, detectedType: detected } : f));
+          setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, detectedType: detected, detectionDone: true } : f));
         },
       });
     });
