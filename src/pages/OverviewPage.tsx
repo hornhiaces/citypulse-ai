@@ -93,13 +93,16 @@ export default function OverviewPage() {
       </div>
 
       {isLeadership && (
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3">Active Recommendations</h2>
-          <div className="space-y-3">
-            {recommendations.slice(0, 2).map((r, i) => (
-              <RecommendationCard key={r.id} data={r} index={i} />
-            ))}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-3">Active Recommendations</h2>
+            <div className="space-y-3">
+              {recommendations.slice(0, 2).map((r, i) => (
+                <RecommendationCard key={r.id} data={r} index={i} />
+              ))}
+            </div>
           </div>
+          <DemoScenarios />
         </div>
       )}
     </>
