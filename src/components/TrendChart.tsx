@@ -6,16 +6,19 @@ interface TrendChartProps {
   dataKey: string;
   color: string;
   description?: string;
+  data?: Record<string, unknown>[];
 }
 
-export function TrendChart({ title, dataKey, color, description }: TrendChartProps) {
+export function TrendChart({ title, dataKey, color, description, data }: TrendChartProps) {
+  const chartData = data || monthlyTrends;
+
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
       {description && <p className="text-xs text-muted-foreground mb-4">{description}</p>}
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={monthlyTrends}>
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.3} />
