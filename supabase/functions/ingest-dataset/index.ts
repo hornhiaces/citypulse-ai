@@ -122,17 +122,17 @@ serve(async (req) => {
 
     if (dataset === "business_licenses") {
       const cleaned = records.map((r: any) => ({
-        license_number: r.license_number || r.LicenseNumber || r.LICENSE_NUMBER || null,
-        business_name: r.business_name || r.BusinessName || r.BUSINESS_NAME || "Unknown",
-        business_type: r.business_type || r.BusinessType || r.BUSINESS_TYPE || null,
-        category: r.category || r.Category || r.CATEGORY || null,
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
-        status: r.status || r.Status || r.STATUS || "active",
-        issue_date: r.issue_date || r.IssueDate || r.ISSUE_DATE || null,
-        expiry_date: r.expiry_date || r.ExpiryDate || r.EXPIRY_DATE || null,
+        license_number: r.pvNUMBER || r.pv_number || r.license_number || null,
+        business_name: r.custCOMPANY_NAME || r.custcompany_name || r.business_name || "Unknown",
+        business_type: r.scNAME || r.sc_name || r.business_type || null,
+        category: r.pvrtDESC || r.pvscDESC || r.category || null,
+        district: null, // Will need geocoding to assign district
+        address: r.Full_Address || r.address || null,
+        latitude: parseFloat(r.Y || r.latitude) || null,
+        longitude: parseFloat(r.X || r.longitude) || null,
+        status: r.pvrtCODE === "EXP" ? "expired" : "active",
+        issue_date: r.pvEFFDATE || r.issue_date || null,
+        expiry_date: r.pvEXPIRE || r.expiry_date || null,
       }));
 
       const { data, error } = await supabase
