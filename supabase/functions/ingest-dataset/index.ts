@@ -112,9 +112,10 @@ serve(async (req) => {
         change_pct: 0,
       }));
 
+      // 911 data lacks district, so just insert (no upsert needed)
       const { data, error } = await supabase
         .from("calls_911_monthly")
-        .upsert(cleaned, { onConflict: "month,year,district,call_type", ignoreDuplicates: false })
+        .insert(cleaned)
         .select("id");
       if (error) errors.push(error.message);
       else inserted = data.length;
