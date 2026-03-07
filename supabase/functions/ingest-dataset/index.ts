@@ -74,20 +74,20 @@ serve(async (req) => {
 
     if (dataset === "311") {
       const cleaned = records.map((r: any) => ({
-        case_id: r.case_id || r.CaseID || r.caseid || r.CASE_ID || null,
-        category: r.category || r.Category || r.CATEGORY || "Other",
-        subcategory: r.subcategory || r.Subcategory || r.SUBCATEGORY || null,
-        description: r.description || r.Description || r.DESCRIPTION || null,
-        status: normalizeStatus(r.status || r.Status || r.STATUS),
-        priority: normalizePriority(r.priority || r.Priority || r.PRIORITY),
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
-        created_date: r.created_date || r.CreatedDate || r.created || r.CREATED_DATE || new Date().toISOString(),
-        resolved_date: r.resolved_date || r.ResolvedDate || r.RESOLVED_DATE || null,
-        resolution_days: parseInt(r.resolution_days || r.ResolutionDays || r.RESOLUTION_DAYS) || null,
-        source: r.source || r.Source || r.SOURCE || "import",
+        case_id: r.Request_ID || r.request_id || r.case_id || r.CaseID || r.OBJECTID?.toString() || null,
+        category: r.Request_Type || r.request_type || r.category || r.Category || "Other",
+        subcategory: r.Department || r.department || r.subcategory || null,
+        description: r.Request_Type || r.description || r.Description || null,
+        status: normalizeStatus(r.Status || r.status),
+        priority: normalizePriority(r.priority || r.Priority),
+        district: parseDistrict(r.District || r.district),
+        address: r.Address || r.address || null,
+        latitude: parseFloat(r.Latitude || r.latitude || r.Y) || null,
+        longitude: parseFloat(r.Longitude || r.longitude || r.X) || null,
+        created_date: r.Create_Date || r.created_date || r.CreatedDate || new Date().toISOString(),
+        resolved_date: r.Close_Date || r.resolved_date || r.ResolvedDate || null,
+        resolution_days: parseInt(r.resolution_days || r.ResolutionDays) || null,
+        source: r.Origin || r.origin || r.source || "import",
       }));
 
       const { data, error } = await supabase
