@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Brain, Map, Shield, Wrench, DollarSign,
-  Lightbulb, Menu, X, Activity
+  Lightbulb, Menu, X, Activity, Eye
 } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 import { useMode } from '@/lib/modeContext';
@@ -16,6 +16,7 @@ const navItems = [
   { path: '/infrastructure', label: 'Infrastructure', icon: Wrench },
   { path: '/economic', label: 'Economic Signals', icon: DollarSign },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
+  { path: '/transparency', label: 'Transparency', icon: Eye },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {

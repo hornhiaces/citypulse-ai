@@ -1,18 +1,19 @@
 import { motion } from 'framer-motion';
-import { districtScores, getScoreBadgeClass } from '@/lib/mockData';
+import { getScoreBadgeClass } from '@/lib/mockData';
+import type { DistrictScore } from '@/lib/mockData';
 import { useMode } from '@/lib/modeContext';
 import { useState } from 'react';
 
 const districtPositions = [
-  { x: 35, y: 20, w: 20, h: 18 },  // D1 Downtown Core
-  { x: 55, y: 15, w: 22, h: 20 },  // D2 Capitol Heights
-  { x: 30, y: 40, w: 18, h: 18 },  // D3 Cloverdale-Idlewild
-  { x: 25, y: 10, w: 20, h: 16 },  // D4 Dalraida
-  { x: 10, y: 35, w: 20, h: 22 },  // D5 Chisholm
-  { x: 58, y: 38, w: 22, h: 18 },  // D6 Governors Square
-  { x: 65, y: 60, w: 20, h: 18 },  // D7 Pike Road Corridor
-  { x: 10, y: 58, w: 22, h: 20 },  // D8 West Boulevard
-  { x: 45, y: 62, w: 18, h: 18 },  // D9 McGehee Estates
+  { x: 35, y: 20, w: 20, h: 18 },
+  { x: 55, y: 15, w: 22, h: 20 },
+  { x: 30, y: 40, w: 18, h: 18 },
+  { x: 25, y: 10, w: 20, h: 16 },
+  { x: 10, y: 35, w: 20, h: 22 },
+  { x: 58, y: 38, w: 22, h: 18 },
+  { x: 65, y: 60, w: 20, h: 18 },
+  { x: 10, y: 58, w: 22, h: 20 },
+  { x: 45, y: 62, w: 18, h: 18 },
 ];
 
 const riskColor = (score: string) => {
@@ -21,30 +22,45 @@ const riskColor = (score: string) => {
   return 'rgba(34, 197, 94, 0.2)';
 };
 
-export function CityHeatmap() {
+interface CityHeatmapProps {
+  districts?: DistrictScore[];
+}
+
+export function CityHeatmap({ districts }: CityHeatmapProps) {
   const { isLeadership } = useMode();
   const [selected, setSelected] = useState<number | null>(null);
-  const selectedDistrict = selected !== null ? districtScores[selected] : null;
+
+  if (!districts?.length) {
+    return (
+      <div className="glass-card p-5">
+        <h3 className="text-sm font-semibold text-foreground mb-1">Geospatial Intelligence</h3>
+        <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">Loading district data…</div>
+      </div>
+    );
+  }
+
+  const selectedDistrict = selected !== null ? districts[selected] : null;
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-sm font-semibold text-foreground mb-1">Geospatial Intelligence</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-1">
+        {isLeadership ? 'Geospatial Intelligence' : 'City Conditions Map'}
+      </h3>
       <p className="text-xs text-muted-foreground mb-4">Montgomery District Overview</p>
 
       <div className="relative w-full aspect-[16/10] bg-secondary/30 rounded-lg border border-border/50 overflow-hidden">
-        {/* Grid lines */}
         <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           {[20, 40, 60, 80].map(p => (
             <g key={p}>
-              <line x1={`${p}%`} y1="0" x2={`${p}%`} y2="100%" stroke="hsl(222 30% 16%)" strokeWidth="0.5" strokeDasharray="4 4" />
-              <line x1="0" y1={`${p}%`} x2="100%" y2={`${p}%`} stroke="hsl(222 30% 16%)" strokeWidth="0.5" strokeDasharray="4 4" />
+              <line x1={`${p}%`} y1="0" x2={`${p}%`} y2="100%" stroke="hsl(var(--border))" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.3" />
+              <line x1="0" y1={`${p}%`} x2="100%" y2={`${p}%`} stroke="hsl(var(--border))" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.3" />
             </g>
           ))}
         </svg>
 
-        {/* Districts */}
-        {districtScores.map((d, i) => {
+        {districts.map((d, i) => {
           const pos = districtPositions[i];
+          if (!pos) return null;
           return (
             <motion.div
               key={d.district}
@@ -72,7 +88,6 @@ export function CityHeatmap() {
         })}
       </div>
 
-      {/* Selected detail */}
       {selectedDistrict && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -97,7 +112,6 @@ export function CityHeatmap() {
         </motion.div>
       )}
 
-      {/* Legend */}
       <div className="mt-3 flex items-center gap-4">
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-rose-500/40" />

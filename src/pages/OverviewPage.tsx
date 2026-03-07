@@ -10,6 +10,7 @@ import { executiveKpis, citizenKpis, recommendations as fallbackRecs } from '@/l
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
+import { DemoScenarios } from '@/components/DemoScenarios';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
@@ -92,13 +93,16 @@ export default function OverviewPage() {
       </div>
 
       {isLeadership && (
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3">Active Recommendations</h2>
-          <div className="space-y-3">
-            {recommendations.slice(0, 2).map((r, i) => (
-              <RecommendationCard key={r.id} data={r} index={i} />
-            ))}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-3">Active Recommendations</h2>
+            <div className="space-y-3">
+              {recommendations.slice(0, 2).map((r, i) => (
+                <RecommendationCard key={r.id} data={r} index={i} />
+              ))}
+            </div>
           </div>
+          <DemoScenarios />
         </div>
       )}
     </>
