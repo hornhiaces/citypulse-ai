@@ -58,6 +58,7 @@ const App = () => (
                 <Route path="/economic" element={<EconomicPage />} />
                 <Route path="/recommendations" element={<RecommendationsPage />} />
                 <Route path="/transparency" element={<TransparencyPage />} />
+                <Route path="/upload" element={<DataUploadPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

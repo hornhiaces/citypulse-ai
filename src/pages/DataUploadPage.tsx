@@ -116,7 +116,7 @@ export default function DataUploadPage() {
     idle: <Upload className="h-5 w-5 text-muted-foreground" />,
     parsing: <Loader2 className="h-5 w-5 text-primary animate-spin" />,
     uploading: <Loader2 className="h-5 w-5 text-primary animate-spin" />,
-    done: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+    done: <CheckCircle className="h-5 w-5 text-primary" />,
     error: <AlertCircle className="h-5 w-5 text-destructive" />,
   };
 
