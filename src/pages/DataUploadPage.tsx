@@ -124,7 +124,7 @@ export default function DataUploadPage() {
     <div className="space-y-6">
       <PageHeader
         title="Data Ingestion"
-        description="Upload large CSV datasets for processing. Files are parsed client-side and sent in chunks."
+        subtitle="Upload large CSV datasets for processing. Files are parsed client-side and sent in chunks."
       />
 
       <Card className="glass-card">
