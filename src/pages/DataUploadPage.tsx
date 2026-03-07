@@ -34,9 +34,9 @@ const DATASET_LABELS: Record<DatasetType, string> = {
 function detectDatasetFromHeaders(headers: string[]): DatasetType | null {
   const lower = headers.map(h => h.toLowerCase().replace(/[\s_-]+/g, ''));
   const sigs: Record<DatasetType, string[]> = {
-    '311': ['caseid', 'subcategory', 'resolutiondays', 'servicerequest'],
-    '911': ['callcount', 'avgresponse', 'priority1', 'priority2', 'calltype'],
-    'business_licenses': ['licensenumber', 'businessname', 'businesstype', 'expirydate'],
+    '311': ['requestid', 'requesttype', 'district', 'department', 'createdate'],
+    '911': ['callcategory', 'callcount', 'phoneserviceprovidertype', 'callorigin', 'fid'],
+    'business_licenses': ['paccnumber', 'custcompanyname', 'pvnumber', 'pvexpire', 'scname'],
   };
   let best: DatasetType | null = null;
   let bestScore = 0;

@@ -8,9 +8,9 @@ const corsHeaders = {
 
 // Auto-detect dataset type from CSV column headers
 const HEADER_SIGNATURES: Record<string, string[]> = {
-  "311": ["case_id", "caseid", "sr_number", "service_request", "subcategory", "resolution_days"],
-  "911": ["call_count", "callcount", "avg_response", "priority_1", "priority_2", "priority_3", "call_type", "calltype"],
-  "business_licenses": ["license_number", "licensenumber", "business_name", "businessname", "business_type", "businesstype", "expiry_date", "expirydate"],
+  "311": ["request_id", "requestid", "request_type", "requesttype", "department", "district", "create_date", "createdate"],
+  "911": ["call_category", "callcategory", "call_count", "callcount", "phone_service_provider", "call_origin", "callorigin", "fid"],
+  "business_licenses": ["paccnumber", "pacc_number", "custcompany_name", "custcompanyname", "pvnumber", "pv_number", "pvexpire", "pv_expire", "scname", "sc_name"],
 };
 
 function detectDataset(columns: string[]): string | null {
@@ -74,20 +74,20 @@ serve(async (req) => {
 
     if (dataset === "311") {
       const cleaned = records.map((r: any) => ({
-        case_id: r.case_id || r.CaseID || r.caseid || r.CASE_ID || null,
-        category: r.category || r.Category || r.CATEGORY || "Other",
-        subcategory: r.subcategory || r.Subcategory || r.SUBCATEGORY || null,
-        description: r.description || r.Description || r.DESCRIPTION || null,
-        status: normalizeStatus(r.status || r.Status || r.STATUS),
-        priority: normalizePriority(r.priority || r.Priority || r.PRIORITY),
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
-        created_date: r.created_date || r.CreatedDate || r.created || r.CREATED_DATE || new Date().toISOString(),
-        resolved_date: r.resolved_date || r.ResolvedDate || r.RESOLVED_DATE || null,
-        resolution_days: parseInt(r.resolution_days || r.ResolutionDays || r.RESOLUTION_DAYS) || null,
-        source: r.source || r.Source || r.SOURCE || "import",
+        case_id: r.Request_ID || r.request_id || r.case_id || r.CaseID || r.OBJECTID?.toString() || null,
+        category: r.Request_Type || r.request_type || r.category || r.Category || "Other",
+        subcategory: r.Department || r.department || r.subcategory || null,
+        description: r.Request_Type || r.description || r.Description || null,
+        status: normalizeStatus(r.Status || r.status),
+        priority: normalizePriority(r.priority || r.Priority),
+        district: parseDistrict(r.District || r.district),
+        address: r.Address || r.address || null,
+        latitude: parseFloat(r.Latitude || r.latitude || r.Y) || null,
+        longitude: parseFloat(r.Longitude || r.longitude || r.X) || null,
+        created_date: r.Create_Date || r.created_date || r.CreatedDate || new Date().toISOString(),
+        resolved_date: r.Close_Date || r.resolved_date || r.ResolvedDate || null,
+        resolution_days: parseInt(r.resolution_days || r.ResolutionDays) || null,
+        source: r.Origin || r.origin || r.source || "import",
       }));
 
       const { data, error } = await supabase
@@ -100,16 +100,16 @@ serve(async (req) => {
 
     if (dataset === "911") {
       const cleaned = records.map((r: any) => ({
-        month: r.month || r.Month || r.MONTH,
-        year: parseInt(r.year || r.Year || r.YEAR),
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        call_type: r.call_type || r.CallType || r.CALL_TYPE || "All",
-        call_count: parseInt(r.call_count || r.CallCount || r.CALL_COUNT) || 0,
-        avg_response_minutes: parseFloat(r.avg_response_minutes || r.AvgResponse || r.AVG_RESPONSE_MINUTES) || null,
-        priority_1_count: parseInt(r.priority_1_count || r.P1 || r.PRIORITY_1_COUNT) || 0,
-        priority_2_count: parseInt(r.priority_2_count || r.P2 || r.PRIORITY_2_COUNT) || 0,
-        priority_3_count: parseInt(r.priority_3_count || r.P3 || r.PRIORITY_3_COUNT) || 0,
-        change_pct: parseFloat(r.change_pct || r.ChangePct || r.CHANGE_PCT) || 0,
+        month: r.Month || r.month || "January",
+        year: parseInt(r.Year || r.year) || new Date().getFullYear(),
+        district: null, // Montgomery 911 data doesn't have district
+        call_type: r.Call_Category || r.call_category || r.call_type || "All",
+        call_count: parseInt(r.Call_Count_by_Phone_Service_Pro || r.Call_Count_By_Origin || r.call_count) || 0,
+        avg_response_minutes: null,
+        priority_1_count: 0,
+        priority_2_count: 0,
+        priority_3_count: 0,
+        change_pct: 0,
       }));
 
       const { data, error } = await supabase
@@ -122,17 +122,17 @@ serve(async (req) => {
 
     if (dataset === "business_licenses") {
       const cleaned = records.map((r: any) => ({
-        license_number: r.license_number || r.LicenseNumber || r.LICENSE_NUMBER || null,
-        business_name: r.business_name || r.BusinessName || r.BUSINESS_NAME || "Unknown",
-        business_type: r.business_type || r.BusinessType || r.BUSINESS_TYPE || null,
-        category: r.category || r.Category || r.CATEGORY || null,
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
-        status: r.status || r.Status || r.STATUS || "active",
-        issue_date: r.issue_date || r.IssueDate || r.ISSUE_DATE || null,
-        expiry_date: r.expiry_date || r.ExpiryDate || r.EXPIRY_DATE || null,
+        license_number: r.pvNUMBER || r.pv_number || r.license_number || null,
+        business_name: r.custCOMPANY_NAME || r.custcompany_name || r.business_name || "Unknown",
+        business_type: r.scNAME || r.sc_name || r.business_type || null,
+        category: r.pvrtDESC || r.pvscDESC || r.category || null,
+        district: null, // Will need geocoding to assign district
+        address: r.Full_Address || r.address || null,
+        latitude: parseFloat(r.Y || r.latitude) || null,
+        longitude: parseFloat(r.X || r.longitude) || null,
+        status: r.pvrtCODE === "EXP" ? "expired" : "active",
+        issue_date: r.pvEFFDATE || r.issue_date || null,
+        expiry_date: r.pvEXPIRE || r.expiry_date || null,
       }));
 
       const { data, error } = await supabase
