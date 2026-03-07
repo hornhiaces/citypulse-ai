@@ -32,10 +32,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <button onClick={() => setSidebarOpen(true)} className="p-2 text-muted-foreground hover:text-foreground">
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
           <span className="font-semibold text-sm">SafeCity AI</span>
-        </div>
+        </Link>
         <ModeToggle />
       </header>
 
