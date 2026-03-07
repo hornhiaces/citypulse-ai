@@ -23,7 +23,23 @@ interface FileUpload {
   errors: string[];
 }
 
-const CHUNK_SIZE = 500;
+const CHUNK_SIZE = 100;
+
+// Only send the columns the edge function actually uses, stripping large unused fields
+const RELEVANT_COLUMNS: Record<DatasetType, string[]> = {
+  '311': ['Request_ID', 'Request_Type', 'Department', 'Address', 'District', 'Status', 'Create_Date', 'Close_Date', 'Origin', 'Latitude', 'Longitude', 'Year'],
+  '911': ['Year', 'Month', 'Call_Category', 'Phone_Service_Provider_Type', 'Call_Count_by_Phone_Service_Pro', 'Call_Origin', 'Call_Count_By_Origin', 'FID'],
+  'business_licenses': ['pvNUMBER', 'custCOMPANY_NAME', 'custDBA', 'scNAME', 'pvrtDESC', 'pvscDESC', 'pvrtCODE', 'pvEFFDATE', 'pvEXPIRE', 'Full_Address', 'X', 'Y', 'pvYEAR'],
+};
+
+function stripRecord(record: Record<string, unknown>, datasetType: DatasetType): Record<string, unknown> {
+  const keep = RELEVANT_COLUMNS[datasetType];
+  const out: Record<string, unknown> = {};
+  for (const key of keep) {
+    if (key in record) out[key] = record[key];
+  }
+  return out;
+}
 
 const DATASET_LABELS: Record<DatasetType, string> = {
   '311': '311 Service Requests',
@@ -111,12 +127,12 @@ export default function DataUploadPage() {
           const chunks = Math.ceil(total / CHUNK_SIZE);
 
           for (let i = 0; i < chunks; i++) {
-            const chunk = records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const rawChunk = records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const chunk = fu.detectedType ? rawChunk.map(r => stripRecord(r, fu.detectedType!)) : rawChunk;
             try {
               const { data, error } = await supabase.functions.invoke('ingest-dataset', {
                 body: {
                   ...(fu.detectedType ? { dataset: fu.detectedType } : {}),
-                  columns,
                   records: chunk,
                 },
               });
