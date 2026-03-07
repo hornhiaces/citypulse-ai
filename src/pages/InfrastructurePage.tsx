@@ -4,19 +4,48 @@ import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { TrendChart } from '@/components/TrendChart';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { useMode } from '@/lib/modeContext';
-import { districtScores } from '@/lib/mockData';
+import { useDistrictScores, useServiceRequestStats, useEmergencyCalls } from '@/hooks/useDistrictData';
 import type { KpiData } from '@/lib/mockData';
-
-const infraKpis: KpiData[] = [
-  { label: 'Active 311 Requests', value: '2,847', change: 12.3, trend: 'up', icon: 'clipboard' },
-  { label: 'Resolution Rate', value: '73.4%', change: 5.6, trend: 'up', icon: 'check' },
-  { label: 'Avg Resolution Time', value: '6.3 days', change: -12.1, trend: 'down', icon: 'clock' },
-  { label: 'Critical Work Orders', value: '23', change: -15, trend: 'down', icon: 'alert' },
-];
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function InfrastructurePage() {
   const { isLeadership } = useMode();
-  const stressedDistricts = districtScores.filter(d => d.infrastructureStress === 'HIGH');
+  const { districts, isLoading: districtsLoading } = useDistrictScores();
+  const { data: stats } = useServiceRequestStats();
+  const { data: emergencyCalls } = useEmergencyCalls();
+
+  const infraKpis: KpiData[] = (() => {
+    if (!stats) {
+      return [
+        { label: 'Active 311 Requests', value: '—', change: 0, trend: 'stable' as const, icon: 'clipboard' },
+        { label: 'Resolution Rate', value: '—', change: 0, trend: 'stable' as const, icon: 'check' },
+        { label: 'High Priority', value: '—', change: 0, trend: 'stable' as const, icon: 'alert' },
+        { label: 'Open Requests', value: '—', change: 0, trend: 'stable' as const, icon: 'clipboard' },
+      ];
+    }
+    const resolutionRate = stats.total ? Math.round((stats.resolved / stats.total) * 1000) / 10 : 0;
+    return [
+      { label: 'Active 311 Requests', value: stats.total.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'clipboard' },
+      { label: 'Resolution Rate', value: `${resolutionRate}%`, change: 0, trend: 'stable' as const, icon: 'check' },
+      { label: 'High Priority', value: stats.highPriority.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'alert' },
+      { label: 'Open Requests', value: stats.open.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'clipboard' },
+    ];
+  })();
+
+  // Build 311 trend data
+  const trendData = (() => {
+    if (!emergencyCalls?.length) return undefined;
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const grouped: Record<string, number> = {};
+    emergencyCalls.forEach(c => {
+      grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0);
+    });
+    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, requests311: grouped[m] || 0 }));
+  })();
+
+  const categoryData = stats?.categoryBreakdown;
+
+  const stressedDistricts = districts.filter(d => d.infrastructureStress === 'HIGH');
 
   return (
     <>
@@ -31,16 +60,24 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" />
-        <CategoryBreakdown />
+        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} />
+        <CategoryBreakdown data={categoryData} />
       </div>
 
       <h2 className="text-lg font-semibold text-foreground mb-3">
         {isLeadership ? 'High-Stress Infrastructure Districts' : 'Areas with Infrastructure Concerns'}
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stressedDistricts.map((d, i) => <DistrictScoreCard key={d.district} data={d} index={i} />)}
-      </div>
+      {districtsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3].map(i => <Skeleton key={i} className="h-48 rounded-xl" />)}
+        </div>
+      ) : stressedDistricts.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {stressedDistricts.map((d, i) => <DistrictScoreCard key={d.district} data={d} index={i} />)}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No high-stress districts detected.</p>
+      )}
     </>
   );
 }
