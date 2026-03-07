@@ -64,6 +64,7 @@ export default function DataUploadPage() {
       id: `${file.name}-${Date.now()}-${Math.random()}`,
       file,
       detectedType: null,
+      detectionDone: false,
       status: 'queued',
       progress: 0,
       totalRows: 0,
