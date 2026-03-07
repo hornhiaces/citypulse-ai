@@ -186,7 +186,7 @@ export default function DataUploadPage() {
     return 'outline';
   };
 
-  const queuedCount = files.filter(f => f.status === 'queued').length;
+  const queuedCount = files.filter(f => f.status === 'queued' && f.detectedType).length;
 
   return (
     <div className="space-y-6">
