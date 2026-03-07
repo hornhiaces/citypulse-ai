@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Brain, Map, Shield, Wrench, DollarSign,
-  Lightbulb, Menu, X, Activity, Eye
+  Lightbulb, Menu, X, Activity, Eye, Upload
 } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 import { useMode } from '@/lib/modeContext';
