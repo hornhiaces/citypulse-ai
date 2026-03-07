@@ -237,11 +237,15 @@ export default function DataUploadPage() {
                         <Badge variant={typeBadgeColor(fu.detectedType)} className="text-xs shrink-0">
                           {DATASET_LABELS[fu.detectedType]}
                         </Badge>
-                      ) : fu.status === 'queued' ? (
-                        <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/30 shrink-0">
+                      ) : fu.detectionDone ? (
+                        <Badge variant="outline" className="text-xs text-destructive border-destructive/30 shrink-0">
+                          Unknown type
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-muted-foreground shrink-0">
                           Detecting...
                         </Badge>
-                      ) : null}
+                      )}
                     </div>
                     {fu.status === 'queued' && (
                       <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeFile(fu.id)}>
