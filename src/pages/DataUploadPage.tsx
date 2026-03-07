@@ -127,12 +127,12 @@ export default function DataUploadPage() {
           const chunks = Math.ceil(total / CHUNK_SIZE);
 
           for (let i = 0; i < chunks; i++) {
-            const chunk = records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const rawChunk = records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const chunk = fu.detectedType ? rawChunk.map(r => stripRecord(r, fu.detectedType!)) : rawChunk;
             try {
               const { data, error } = await supabase.functions.invoke('ingest-dataset', {
                 body: {
                   ...(fu.detectedType ? { dataset: fu.detectedType } : {}),
-                  columns,
                   records: chunk,
                 },
               });
