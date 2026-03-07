@@ -100,16 +100,16 @@ serve(async (req) => {
 
     if (dataset === "911") {
       const cleaned = records.map((r: any) => ({
-        month: r.month || r.Month || r.MONTH,
-        year: parseInt(r.year || r.Year || r.YEAR),
-        district: parseDistrict(r.district || r.District || r.DISTRICT),
-        call_type: r.call_type || r.CallType || r.CALL_TYPE || "All",
-        call_count: parseInt(r.call_count || r.CallCount || r.CALL_COUNT) || 0,
-        avg_response_minutes: parseFloat(r.avg_response_minutes || r.AvgResponse || r.AVG_RESPONSE_MINUTES) || null,
-        priority_1_count: parseInt(r.priority_1_count || r.P1 || r.PRIORITY_1_COUNT) || 0,
-        priority_2_count: parseInt(r.priority_2_count || r.P2 || r.PRIORITY_2_COUNT) || 0,
-        priority_3_count: parseInt(r.priority_3_count || r.P3 || r.PRIORITY_3_COUNT) || 0,
-        change_pct: parseFloat(r.change_pct || r.ChangePct || r.CHANGE_PCT) || 0,
+        month: r.Month || r.month || "January",
+        year: parseInt(r.Year || r.year) || new Date().getFullYear(),
+        district: null, // Montgomery 911 data doesn't have district
+        call_type: r.Call_Category || r.call_category || r.call_type || "All",
+        call_count: parseInt(r.Call_Count_by_Phone_Service_Pro || r.Call_Count_By_Origin || r.call_count) || 0,
+        avg_response_minutes: null,
+        priority_1_count: 0,
+        priority_2_count: 0,
+        priority_3_count: 0,
+        change_pct: 0,
       }));
 
       const { data, error } = await supabase
