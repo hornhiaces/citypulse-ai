@@ -15,6 +15,7 @@ interface FileUpload {
   id: string;
   file: File;
   detectedType: DatasetType | null;
+  detectionDone: boolean;
   status: 'queued' | 'parsing' | 'uploading' | 'done' | 'error';
   progress: number;
   totalRows: number;
@@ -63,6 +64,7 @@ export default function DataUploadPage() {
       id: `${file.name}-${Date.now()}-${Math.random()}`,
       file,
       detectedType: null,
+      detectionDone: false,
       status: 'queued',
       progress: 0,
       totalRows: 0,
@@ -78,7 +80,7 @@ export default function DataUploadPage() {
         complete: (results) => {
           const headers = results.meta.fields || [];
           const detected = detectDatasetFromHeaders(headers);
-          setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, detectedType: detected } : f));
+          setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, detectedType: detected, detectionDone: true } : f));
         },
       });
     });
@@ -147,13 +149,17 @@ export default function DataUploadPage() {
   };
 
   const handleUploadAll = useCallback(async () => {
-    const queued = files.filter(f => f.status === 'queued');
-    if (!queued.length) { toast.error('No files to process'); return; }
+    const queued = files.filter(f => f.status === 'queued' && f.detectedType);
+    const skipped = files.filter(f => f.status === 'queued' && !f.detectedType);
 
-    const undetected = queued.filter(f => !f.detectedType);
-    if (undetected.length) {
-      toast.error(`Cannot detect dataset type for: ${undetected.map(f => f.file.name).join(', ')}`);
+    if (!queued.length) {
+      toast.error('No recognized dataset files to process. Remove unknown files or add valid CSVs.');
       return;
+    }
+
+    if (skipped.length) {
+      toast.warning(`Skipping ${skipped.length} unrecognized file(s): ${skipped.map(f => f.file.name).join(', ')}`);
+      setFiles(prev => prev.map(f => skipped.some(s => s.id === f.id) ? { ...f, status: 'error', errors: ['Unrecognized dataset type'] } : f));
     }
 
     setIsProcessing(true);
@@ -235,11 +241,15 @@ export default function DataUploadPage() {
                         <Badge variant={typeBadgeColor(fu.detectedType)} className="text-xs shrink-0">
                           {DATASET_LABELS[fu.detectedType]}
                         </Badge>
-                      ) : fu.status === 'queued' ? (
-                        <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/30 shrink-0">
+                      ) : fu.detectionDone ? (
+                        <Badge variant="outline" className="text-xs text-destructive border-destructive/30 shrink-0">
+                          Unknown type
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-muted-foreground shrink-0">
                           Detecting...
                         </Badge>
-                      ) : null}
+                      )}
                     </div>
                     {fu.status === 'queued' && (
                       <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeFile(fu.id)}>
