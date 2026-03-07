@@ -10,6 +10,7 @@ import { executiveKpis, citizenKpis, recommendations as fallbackRecs } from '@/l
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
+import { DemoScenarios } from '@/components/DemoScenarios';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
