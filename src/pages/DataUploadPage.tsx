@@ -149,13 +149,17 @@ export default function DataUploadPage() {
   };
 
   const handleUploadAll = useCallback(async () => {
-    const queued = files.filter(f => f.status === 'queued');
-    if (!queued.length) { toast.error('No files to process'); return; }
+    const queued = files.filter(f => f.status === 'queued' && f.detectedType);
+    const skipped = files.filter(f => f.status === 'queued' && !f.detectedType);
 
-    const undetected = queued.filter(f => !f.detectedType);
-    if (undetected.length) {
-      toast.error(`Cannot detect dataset type for: ${undetected.map(f => f.file.name).join(', ')}`);
+    if (!queued.length) {
+      toast.error('No recognized dataset files to process. Remove unknown files or add valid CSVs.');
       return;
+    }
+
+    if (skipped.length) {
+      toast.warning(`Skipping ${skipped.length} unrecognized file(s): ${skipped.map(f => f.file.name).join(', ')}`);
+      setFiles(prev => prev.map(f => skipped.some(s => s.id === f.id) ? { ...f, status: 'error', errors: ['Unrecognized dataset type'] } : f));
     }
 
     setIsProcessing(true);
