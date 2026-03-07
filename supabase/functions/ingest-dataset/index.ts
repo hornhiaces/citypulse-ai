@@ -8,9 +8,9 @@ const corsHeaders = {
 
 // Auto-detect dataset type from CSV column headers
 const HEADER_SIGNATURES: Record<string, string[]> = {
-  "311": ["case_id", "caseid", "sr_number", "service_request", "subcategory", "resolution_days"],
-  "911": ["call_count", "callcount", "avg_response", "priority_1", "priority_2", "priority_3", "call_type", "calltype"],
-  "business_licenses": ["license_number", "licensenumber", "business_name", "businessname", "business_type", "businesstype", "expiry_date", "expirydate"],
+  "311": ["request_id", "requestid", "request_type", "requesttype", "department", "district", "create_date", "createdate"],
+  "911": ["call_category", "callcategory", "call_count", "callcount", "phone_service_provider", "call_origin", "callorigin", "fid"],
+  "business_licenses": ["paccnumber", "pacc_number", "custcompany_name", "custcompanyname", "pvnumber", "pv_number", "pvexpire", "pv_expire", "scname", "sc_name"],
 };
 
 function detectDataset(columns: string[]): string | null {
