@@ -8,7 +8,7 @@ Use this outline to build slides in Google Slides, Canva, or Keynote.
 **City Pulse AI**
 *AI-Powered Municipal Intelligence for Smarter Cities*
 - Montgomery, AL — GenAI Works Hackathon 2026
-- [Team name & members]
+- **Team-theGump:** Larry Salinas · Kathiravan Kamatchi
 - Live: city-pulse-aip.lovable.app
 
 ---
