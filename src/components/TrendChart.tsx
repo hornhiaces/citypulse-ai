@@ -12,9 +12,14 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ title, dataKey, color, description, data, isLoading, error }: TrendChartProps) {
-  const chartData = data ?? monthlyTrends;
-  const isEmpty = data && data.length === 0;
-  const showMockData = !data;
+  // Explicit data state detection
+  const hasLiveData = Array.isArray(data) && data.length > 0;
+  const isEmptyData = Array.isArray(data) && data.length === 0;
+  const isUndefinedData = !Array.isArray(data);
+
+  // Use live data if available, otherwise fallback
+  const chartData = hasLiveData ? data : monthlyTrends;
+  const showMockData = isUndefinedData || isEmptyData;
 
   return (
     <div className="glass-card p-5">
@@ -22,15 +27,15 @@ export function TrendChart({ title, dataKey, color, description, data, isLoading
       {description && <p className="text-xs text-muted-foreground mb-4">{description}</p>}
       {isLoading ? (
         <div className="h-48 flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Loading chart data...</p>
+          <p className="text-sm text-muted-foreground">⏳ Loading chart data...</p>
         </div>
       ) : error ? (
         <div className="h-48 flex items-center justify-center">
-          <p className="text-sm text-red-500">Error loading data: {error.message}</p>
+          <p className="text-sm text-red-500">❌ Error loading data: {error.message}</p>
         </div>
-      ) : isEmpty ? (
+      ) : isEmptyData ? (
         <div className="h-48 flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">No data available for this period</p>
+          <p className="text-sm text-muted-foreground">📊 No data available for this period</p>
         </div>
       ) : (
       <div className="h-48">

@@ -6,16 +6,20 @@ interface DistrictEmergencyChartProps {
 }
 
 export function DistrictEmergencyChart({ data }: DistrictEmergencyChartProps) {
-  const chartData = data ?? districtEmergencyData;
-  const isEmpty = data && data.length === 0;
+  // Explicit data state detection
+  const hasLiveData = Array.isArray(data) && data.length > 0;
+  const isEmptyData = Array.isArray(data) && data.length === 0;
+
+  // Use live data if available, otherwise fallback
+  const chartData = hasLiveData ? data : districtEmergencyData;
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">Emergency Calls by District</h3>
       <p className="text-xs text-muted-foreground mb-4">30-day volume with month-over-month change</p>
-      {isEmpty ? (
+      {isEmptyData ? (
         <div className="h-56 flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">No district data available</p>
+          <p className="text-sm text-muted-foreground">📊 No district data available</p>
         </div>
       ) : (
       <div className="h-56">

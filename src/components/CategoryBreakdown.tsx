@@ -6,13 +6,18 @@ interface CategoryBreakdownProps {
 }
 
 export function CategoryBreakdown({ data }: CategoryBreakdownProps) {
-  const categories = data || serviceRequestCategories;
+  // Explicit data state detection
+  const hasLiveData = Array.isArray(data) && data.length > 0;
+  const isEmptyData = Array.isArray(data) && data.length === 0;
+
+  // Use live data if available, otherwise fallback to mock data
+  const categories = hasLiveData ? data : serviceRequestCategories;
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-4">311 Request Categories</h3>
-      {categories.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No category data available.</p>
+      {isEmptyData ? (
+        <p className="text-sm text-muted-foreground">📊 No category data available.</p>
       ) : (
         <div className="space-y-3">
           {categories.map((cat, i) => (
