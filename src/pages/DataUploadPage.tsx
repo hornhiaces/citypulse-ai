@@ -20,6 +20,7 @@ interface FileUpload {
   progress: number;
   totalRows: number;
   insertedRows: number;
+  completionRate: number;
   errors: string[];
 }
 
@@ -69,6 +70,7 @@ export default function DataUploadPage() {
       progress: 0,
       totalRows: 0,
       insertedRows: 0,
+      completionRate: 0,
       errors: [],
     }));
 
@@ -174,11 +176,31 @@ export default function DataUploadPage() {
             setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, progress, insertedRows: inserted } : f));
           }
 
+          const completionRate = total > 0 ? (inserted / total) * 100 : 0;
+          const COMPLETION_THRESHOLD = 98;
+          const shouldAccept = completionRate >= COMPLETION_THRESHOLD;
+
+          // Log partial completions for audit trail
+          if (shouldAccept && completionRate < 100) {
+            const missingRows = total - inserted;
+            console.warn(
+              `[Ingest] File accepted with partial completion: ${fu.file.name}`,
+              {
+                completionRate: completionRate.toFixed(2),
+                insertedRows: inserted,
+                totalRows: total,
+                missingRows,
+                datasetType: fu.detectedType,
+              }
+            );
+          }
+
           setFiles(prev => prev.map(f => f.id === fu.id ? {
             ...f,
-            status: errors.length && inserted === 0 ? 'error' : 'done',
+            status: shouldAccept ? 'done' : 'error',
             errors,
             insertedRows: inserted,
+            completionRate,
           } : f));
 
           resolve();
@@ -221,7 +243,11 @@ export default function DataUploadPage() {
     await queryClient.invalidateQueries({ queryKey: ['business-license-stats'] });
     await queryClient.invalidateQueries({ queryKey: ['business-licenses'] });
 
-    toast.success(`Finished processing ${processable.length} file(s)} - Refreshing dashboard...`);
+    const partialFiles = processable.filter(f => f.completionRate > 0 && f.completionRate < 100 && f.status === 'done');
+    const message = partialFiles.length > 0
+      ? `Finished processing ${processable.length} file(s) (${partialFiles.length} with >98% completion) - Refreshing dashboard...`
+      : `Finished processing ${processable.length} file(s) - Refreshing dashboard...`;
+    toast.success(message);
   }, [files, queryClient]);
 
   const statusIcon = (s: FileUpload['status']) => {
@@ -311,12 +337,20 @@ export default function DataUploadPage() {
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>
                           {fu.status === 'uploading' && 'Processing...'}
-                          {fu.status === 'done' && 'Complete'}
+                          {fu.status === 'done' && (fu.completionRate < 100 ? 'Complete (Partial)' : 'Complete')}
                           {fu.status === 'error' && 'Failed'}
                         </span>
-                        <span>{fu.insertedRows.toLocaleString()} / {fu.totalRows.toLocaleString()} rows</span>
+                        <span>
+                          {fu.insertedRows.toLocaleString()} / {fu.totalRows.toLocaleString()} rows
+                          {fu.completionRate > 0 && ` (${fu.completionRate.toFixed(1)}%)`}
+                        </span>
                       </div>
                       <Progress value={fu.progress} className="h-1.5" />
+                      {fu.completionRate > 0 && fu.completionRate < 100 && fu.status === 'done' && (
+                        <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+                          ✓ Accepted with {fu.completionRate.toFixed(2)}% completion rate ({fu.totalRows - fu.insertedRows} rows unavailable due to connection errors)
+                        </p>
+                      )}
                       {fu.errors.length > 0 && (
                         <div className="bg-destructive/10 border border-destructive/20 rounded p-2 max-h-20 overflow-y-auto mt-1">
                           {fu.errors.slice(0, 3).map((err, i) => (
