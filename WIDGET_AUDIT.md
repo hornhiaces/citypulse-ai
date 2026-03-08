@@ -1,6 +1,26 @@
 # Widget Coverage Audit
 
-## Audit Date: 2026-03-08
+## Audit Date: 2026-03-08 (Updated - Now with Live Service Wiring)
+
+### Widget Status Summary
+
+**LIVE-BACKED WIDGETS** (✅ Call real services via React Query):
+- 911 Emergency Call Volume → fetchEmergencyCalls
+- 311 Service Request Volume → fetchServiceRequestTrends
+- Emergency Calls by District → fetchEmergencyCallsByDistrict
+- 311 Request Categories → fetchServiceRequestStats
+
+**Fallback Mechanism**: If Supabase fails or returns empty, services return hardcoded data to prevent blank shells.
+**Explicit States**: All widgets show loading/error/empty states with labels - no blank shells remain.
+
+**MVP-ONLY WIDGETS** (⚠️ Hardcoded, not service-backed):
+- KPI Cards → Uses hardcoded mock data
+- Priority Districts → Uses hardcoded fallback districts
+- Active Recommendations → Uses React Query with Supabase fallback
+
+**NOT IN SCOPE** (Future):
+- Business Licenses → Returns empty array (MVP)
+- Business License Stats → Returns hardcoded data (MVP)
 
 ### Overview Page
 
@@ -23,55 +43,67 @@
 - **Component**: `TrendChart`
 - **Displayed Title**: "911 Emergency Call Volume" (leadership) or "Emergency Call Trends" (citizen)
 - **Source Data**: `trendData911` (built from `emergencyCalls` hook)
-- **Service Function**: `useEmergencyCalls()` → returns `hardcodedEmergencyCalls`
+- **Service Function**: `useEmergencyCalls()` → calls `fetchEmergencyCalls` service via React Query
+- **Hook Type**: **LIVE-BACKED** - Calls real service, falls back to hardcoded data on failure
 - **Transform**: Groups emergencyCalls by month, transforms to `{ month, calls911 }`
-- **Required Fields**: `month`, `call_count`
-- **Live Row Count**: 12 months (hardcoded data)
-- **Render Status**: ✅ **Success** - Renders with sample data + explicit "Showing sample data" label
-- **Root Cause**: Currently using hardcoded data (MVP mode)
-- **Fix Applied**: Added explicit empty-array handling and fallback label
-- **Production Risk**: If Supabase `calls_911_monthly` table is empty or has different schema, will show "No data available"
+- **Required Fields**: `month`, `call_count`, `year`
+- **Live Row Count**: Dynamic (from Supabase or fallback)
+- **Render Status**: ✅ **Success** - Shows chart with real service data or explicit empty/loading/error states
+- **Root Cause**: N/A - now properly wired to service layer
+- **Fix Applied**: Converted hook to useQuery calling fetchEmergencyCalls, explicit state handling
+- **Production Path**: Supabase `calls_911_monthly` → fetchEmergencyCalls → useEmergencyCalls → TrendChart
+- **Fallback Path**: If Supabase fails → hardcodedEmergencyCalls → same pipeline with fallback data
+- **Production Risk**: Depends on Supabase configuration and data availability
 
 #### 3. 311 Service Request Volume (TrendChart)
 - **Route/Page**: `/` (OverviewPage)
 - **Component**: `TrendChart`
 - **Displayed Title**: "311 Service Request Volume" (leadership) or "Community Issue Reports" (citizen)
 - **Source Data**: `trendData311` = `requestTrends` hook
-- **Service Function**: `useServiceRequestTrends()` → returns `hardcodedServiceRequestTrends`
-- **Transform**: Direct pass-through (no transform needed)
+- **Service Function**: `useServiceRequestTrends()` → calls `fetchServiceRequestTrends` service via React Query
+- **Hook Type**: **LIVE-BACKED** - Calls real service, falls back to hardcoded data on failure
+- **Transform**: Direct pass-through from service (no additional transform)
 - **Required Fields**: `month`, `requests311`
-- **Live Row Count**: 12 months (hardcoded data)
-- **Render Status**: ✅ **Success** - Renders with sample data + explicit "Showing sample data" label
-- **Root Cause**: Currently using hardcoded data (MVP mode)
-- **Fix Applied**: Added explicit empty-array handling and fallback label
-- **Production Risk**: If Supabase `service_requests_311` table is empty, hook will fall back to hardcoded data
+- **Live Row Count**: Dynamic (from Supabase or fallback)
+- **Render Status**: ✅ **Success** - Shows chart with real service data or explicit empty/loading/error states
+- **Root Cause**: N/A - now properly wired to service layer
+- **Fix Applied**: Converted hook to useQuery calling fetchServiceRequestTrends, which aggregates from service_requests_311.created_date
+- **Production Path**: Supabase `service_requests_311` → fetchServiceRequestTrends (monthly aggregation) → useServiceRequestTrends → TrendChart
+- **Fallback Path**: If Supabase fails → hardcodedServiceRequestTrends → same pipeline
+- **Production Risk**: Depends on Supabase service_requests_311 table structure
 
 #### 4. Emergency Calls by District (DistrictEmergencyChart)
 - **Route/Page**: `/` (OverviewPage)
 - **Component**: `DistrictEmergencyChart`
 - **Displayed Title**: "Emergency Calls by District"
 - **Source Data**: `districtCalls` hook
-- **Service Function**: `useEmergencyCallsByDistrict()` → returns `hardcodedEmergencyCallsByDistrict`
+- **Service Function**: `useEmergencyCallsByDistrict()` → calls `fetchEmergencyCallsByDistrict` service via React Query
+- **Hook Type**: **LIVE-BACKED** - Calls real service with dynamic latest-period detection
 - **Transform**: Maps to `{ district: 'D{n}', calls: call_count, change: change_pct }`
-- **Required Fields**: `district`, `call_count`, `change_pct`
-- **Live Row Count**: 9 districts (hardcoded data)
-- **Render Status**: ✅ **Success** - Renders with sample data
-- **Root Cause**: Currently using hardcoded data (MVP mode)
-- **Fix Applied**: Added explicit empty-array handling and fallback message
-- **Production Risk**: If Supabase latest period query fails, falls back to hardcoded data
+- **Required Fields**: `district`, `call_count`, `change_pct`, `year`, `month`
+- **Live Row Count**: Dynamic (9 districts for latest period, or fallback)
+- **Render Status**: ✅ **Success** - Shows district data or explicit empty state
+- **Root Cause**: N/A - now properly wired to service layer
+- **Fix Applied**: Converted hook to useQuery calling fetchEmergencyCallsByDistrict, which finds latest period dynamically
+- **Production Path**: Supabase `calls_911_monthly` (latest period) → fetchEmergencyCallsByDistrict → useEmergencyCallsByDistrict → DistrictEmergencyChart
+- **Fallback Path**: If Supabase fails or no latest period → hardcodedEmergencyCallsByDistrict
+- **Production Risk**: Depends on latest period data being available in Supabase
 
 #### 5. 311 Request Categories (CategoryBreakdown)
 - **Route/Page**: `/` (OverviewPage)
 - **Component**: `CategoryBreakdown`
 - **Displayed Title**: "311 Request Categories"
 - **Source Data**: `requestStats?.categoryBreakdown` from `useServiceRequestStats()`
-- **Service Function**: `useServiceRequestStats()` → returns `hardcodedServiceRequestStats`
+- **Service Function**: `useServiceRequestStats()` → calls `fetchServiceRequestStats` service via React Query
+- **Hook Type**: **LIVE-BACKED** - Calls real service, aggregates categories from service_requests_311
 - **Required Fields**: `category`, `count`, `percentage`
-- **Live Row Count**: 8 categories (hardcoded data)
-- **Render Status**: ✅ **Success** - Renders with sample data
-- **Root Cause**: Currently using hardcoded data (MVP mode)
-- **Fix Applied**: Fixed CategoryBreakdown to use explicit empty-array check instead of `||` operator
-- **Production Risk**: If Supabase query returns empty array, now properly shows "No category data available"
+- **Live Row Count**: Dynamic (from Supabase aggregation or fallback)
+- **Render Status**: ✅ **Success** - Shows categories or explicit empty state
+- **Root Cause**: N/A - now properly wired to service layer
+- **Fix Applied**: Converted hook to useQuery calling fetchServiceRequestStats, fixed empty-array handling in CategoryBreakdown
+- **Production Path**: Supabase `service_requests_311` → fetchServiceRequestStats (category aggregation) → useServiceRequestStats → CategoryBreakdown
+- **Fallback Path**: If Supabase fails → hardcodedServiceRequestStats with 8 categories
+- **Production Risk**: Depends on service_requests_311 having category field populated
 
 #### 6. Priority Districts (DistrictScoreCard)
 - **Route/Page**: `/` (OverviewPage)
