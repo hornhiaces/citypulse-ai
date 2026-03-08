@@ -16,7 +16,7 @@ const InfrastructurePage = lazy(() => import("./pages/InfrastructurePage"));
 const EconomicPage = lazy(() => import("./pages/EconomicPage"));
 const RecommendationsPage = lazy(() => import("./pages/RecommendationsPage"));
 const TransparencyPage = lazy(() => import("./pages/TransparencyPage"));
-const DataUploadPage = lazy(() => import("./pages/DataUploadPage"));
+
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -58,7 +58,7 @@ const App = () => (
                 <Route path="/economic" element={<EconomicPage />} />
                 <Route path="/recommendations" element={<RecommendationsPage />} />
                 <Route path="/transparency" element={<TransparencyPage />} />
-                <Route path="/upload" element={<DataUploadPage />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
