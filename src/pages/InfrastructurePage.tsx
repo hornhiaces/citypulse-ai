@@ -27,7 +27,7 @@ export default function InfrastructurePage() {
     return [
       { label: 'Active 311 Requests', value: stats.total.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'clipboard' },
       { label: 'Resolution Rate', value: `${resolutionRate}%`, change: 0, trend: 'stable' as const, icon: 'check' },
-      { label: 'High Priority', value: stats.highPriority.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'alert' },
+      { label: 'In Progress', value: stats.inProgress.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'alert' },
       { label: 'Open Requests', value: stats.open.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'clipboard' },
     ];
   })();
