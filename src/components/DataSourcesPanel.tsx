@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Database, ExternalLink, CheckCircle2, Clock, FileText, Shield, Building2 } from 'lucide-react';
+import { Database, ExternalLink, CheckCircle2, Clock, FileText, Shield, Building2, Download, Eye } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
