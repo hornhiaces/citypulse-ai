@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import Papa from 'papaparse';
 import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/PageHeader';
@@ -50,6 +51,7 @@ export default function DataUploadPage() {
   const [files, setFiles] = useState<FileUpload[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const handleFilesSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -200,8 +202,17 @@ export default function DataUploadPage() {
     }
     setIsProcessing(false);
 
-    toast.success(`Finished processing ${processable.length} file(s)`);
-  }, [files]);
+    // Invalidate all data caches so charts refetch fresh data
+    await queryClient.invalidateQueries({ queryKey: ['district-scores'] });
+    await queryClient.invalidateQueries({ queryKey: ['emergency-calls'] });
+    await queryClient.invalidateQueries({ queryKey: ['emergency-calls-by-district'] });
+    await queryClient.invalidateQueries({ queryKey: ['service-request-stats'] });
+    await queryClient.invalidateQueries({ queryKey: ['service-request-trends'] });
+    await queryClient.invalidateQueries({ queryKey: ['business-license-stats'] });
+    await queryClient.invalidateQueries({ queryKey: ['business-licenses'] });
+
+    toast.success(`Finished processing ${processable.length} file(s)} - Refreshing dashboard...`);
+  }, [files, queryClient]);
 
   const statusIcon = (s: FileUpload['status']) => {
     if (s === 'queued') return <FileText className="h-4 w-4 text-muted-foreground" />;
