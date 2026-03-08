@@ -98,16 +98,23 @@ export default function OverviewPage() {
          </div>
        </div>
 
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
-          {isLeadership ? 'Priority Districts' : 'Districts Needing Attention'}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {priorityDistricts.map((d, i) => (
-            <DistrictScoreCard key={d.district} data={d} index={i} />
-          ))}
-        </div>
-      </div>
+       <div className="mb-6">
+         <h2 className="text-lg font-semibold text-foreground mb-3">
+           {isLeadership ? 'Priority Districts' : 'Districts Needing Attention'}
+         </h2>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {priorityDistricts.map((d, i) => (
+             <DistrictScoreCard key={d.district} data={d} index={i} />
+           ))}
+         </div>
+       </div>
+
+       {isLeadership && (
+         <div className="mb-6 space-y-4">
+           <ForecastSummarySection />
+           <StrategicActionsSection />
+         </div>
+       )}
 
       {isLeadership && (
         <div className="space-y-6">
