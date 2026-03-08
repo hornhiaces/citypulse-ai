@@ -1,11 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { hardcodedEmergencyCalls, hardcodedEmergencyCallsByDistrict } from '@/lib/hardcodedData';
-
-const MONTH_ORDER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function monthIndex(m: string): number {
-  return MONTH_ORDER.indexOf(m);
-}
+import { MONTH_ORDER, monthIndex } from '@/lib/dateUtils';
 
 export async function fetchEmergencyCalls(filters?: { district?: number; year?: number }) {
   try {

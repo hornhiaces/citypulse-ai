@@ -7,6 +7,7 @@ import { useMode } from '@/lib/modeContext';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict } from '@/hooks/useDistrictData';
 import type { KpiData } from '@/lib/mockData';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MONTH_ORDER, monthIndex } from '@/lib/dateUtils';
 
 export default function SafetyPage() {
   const { isLeadership } = useMode();
@@ -26,10 +27,9 @@ export default function SafetyPage() {
     }
 
     // Dynamically find the most recent month/year in the data
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const sorted = [...emergencyCalls].sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
-      return monthOrder.indexOf(b.month) - monthOrder.indexOf(a.month);
+      return monthIndex(b.month) - monthIndex(a.month);
     });
     const latestMonth = sorted[0]?.month;
     const latestYear = sorted[0]?.year;
@@ -60,13 +60,12 @@ export default function SafetyPage() {
   // Build trend data from live calls
   const trendData = (() => {
     if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const grouped: Record<string, number> = {};
     emergencyCalls.forEach(c => {
       const key = `${c.month}`;
       grouped[key] = (grouped[key] || 0) + (c.call_count || 0);
     });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
+    return MONTH_ORDER.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
   const highRiskDistricts = districts.filter(d => d.publicSafetyPressure === 'HIGH');

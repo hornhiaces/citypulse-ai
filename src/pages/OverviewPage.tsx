@@ -7,6 +7,7 @@ import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { DistrictEmergencyChart } from '@/components/DistrictEmergencyChart';
 import { useMode } from '@/lib/modeContext';
 import { executiveKpis, citizenKpis, recommendations as fallbackRecs } from '@/lib/mockData';
+import { MONTH_ORDER } from '@/lib/dateUtils';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
@@ -44,10 +45,9 @@ export default function OverviewPage() {
   // Build trend data
   const trendData911 = (() => {
     if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const grouped: Record<string, number> = {};
     emergencyCalls.forEach(c => { grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0); });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
+    return MONTH_ORDER.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
   // 311 trend data from live service requests (aggregated by month)

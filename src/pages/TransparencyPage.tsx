@@ -11,6 +11,7 @@ import {
   useBusinessLicenseStats,
 } from '@/hooks/useDistrictData';
 import type { KpiData } from '@/lib/mockData';
+import { MONTH_ORDER } from '@/lib/dateUtils';
 import { motion } from 'framer-motion';
 import { FileText, Database, Shield, Building2 } from 'lucide-react';
 
@@ -54,12 +55,11 @@ export default function TransparencyPage() {
 
   const trendData = (() => {
     if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const grouped: Record<string, number> = {};
     emergencyCalls.forEach(c => {
       grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0);
     });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
+    return MONTH_ORDER.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
   return (

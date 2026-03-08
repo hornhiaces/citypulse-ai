@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { hardcodedServiceRequestStats, hardcodedServiceRequestTrends } from '@/lib/hardcodedData';
+import { MONTH_ORDER } from '@/lib/dateUtils';
 
 export async function fetchServiceRequests(filters?: { district?: number; status?: string; category?: string }) {
   try {
@@ -57,13 +58,12 @@ export async function fetchServiceRequestTrends() {
 
     // Group by month and count
     const monthMap: Record<string, number> = {};
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     data.forEach(r => {
       if (!r.created_date) return;
       try {
         const date = new Date(r.created_date);
-        const month = monthOrder[date.getMonth()];
+        const month = MONTH_ORDER[date.getMonth()];
         if (month) {
           monthMap[month] = (monthMap[month] || 0) + 1;
         }
@@ -73,7 +73,7 @@ export async function fetchServiceRequestTrends() {
     });
 
     // Return as array sorted by month order
-    const trends = monthOrder
+    const trends = MONTH_ORDER
       .filter(m => monthMap[m])
       .map(m => ({ month: m, requests311: monthMap[m] || 0 }));
 
