@@ -1,5 +1,14 @@
+import { useQuery } from '@tanstack/react-query';
 import { districtScores as fallbackDistricts } from '@/lib/mockData';
-import { hardcodedServiceRequestStats, hardcodedServiceRequestTrends, hardcodedEmergencyCalls, hardcodedEmergencyCallsByDistrict, hardcodedBusinessLicenseStats } from '@/lib/hardcodedData';
+import {
+  fetchEmergencyCalls,
+  fetchEmergencyCallsByDistrict,
+} from '@/services/emergencyCallService';
+import {
+  fetchServiceRequests,
+  fetchServiceRequestStats,
+  fetchServiceRequestTrends,
+} from '@/services/serviceRequestService';
 import type { DistrictScore, ScoreLevel } from '@/lib/mockData';
 
 export function mapDbDistricts(dbDistricts: any[]): DistrictScore[] {
@@ -16,7 +25,7 @@ export function mapDbDistricts(dbDistricts: any[]): DistrictScore[] {
   }));
 }
 
-// MVP Mode: Return hardcoded data directly - no React Query
+// MVP Mode: Return hardcoded districts - no Supabase wiring for districts yet
 export function useDistrictScores() {
   return {
     districts: fallbackDistricts,
@@ -25,38 +34,85 @@ export function useDistrictScores() {
   };
 }
 
+// Real React Query hook - calls fetchServiceRequestStats service
 export function useServiceRequestStats() {
+  const query = useQuery({
+    queryKey: ['serviceRequestStats'],
+    queryFn: fetchServiceRequestStats,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return {
-    data: hardcodedServiceRequestStats,
-    isLoading: false,
-    error: null,
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
   };
 }
 
+// Real React Query hook - calls fetchEmergencyCalls service
 export function useEmergencyCalls() {
+  const query = useQuery({
+    queryKey: ['emergencyCalls'],
+    queryFn: () => fetchEmergencyCalls(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return {
-    data: hardcodedEmergencyCalls,
-    isLoading: false,
-    error: null,
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
   };
 }
 
+// Real React Query hook - calls fetchEmergencyCallsByDistrict service
 export function useEmergencyCallsByDistrict() {
+  const query = useQuery({
+    queryKey: ['emergencyCallsByDistrict'],
+    queryFn: fetchEmergencyCallsByDistrict,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return {
-    data: hardcodedEmergencyCallsByDistrict,
-    isLoading: false,
-    error: null,
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
   };
 }
 
+// Real React Query hook - calls fetchServiceRequestTrends service
+export function useServiceRequestTrends() {
+  const query = useQuery({
+    queryKey: ['serviceRequestTrends'],
+    queryFn: fetchServiceRequestTrends,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+// MVP Mode - not converted yet
 export function useBusinessLicenseStats() {
   return {
-    data: hardcodedBusinessLicenseStats,
+    data: {
+      total: 66278,
+      active: 62134,
+      expired: 3245,
+      suspended: 899,
+    },
     isLoading: false,
     error: null,
   };
 }
 
+// MVP Mode - not converted yet
 export function useBusinessLicenses() {
   return {
     data: [],
@@ -65,10 +121,8 @@ export function useBusinessLicenses() {
   };
 }
 
-export function useServiceRequestTrends() {
-  return {
-    data: hardcodedServiceRequestTrends,
-    isLoading: false,
-    error: null,
-  };
+// Helper function for service tests (not converted - uses fetchServiceRequests)
+export async function fetchAllServiceRequests(filters?: { district?: number; status?: string; category?: string }) {
+  return fetchServiceRequests(filters);
 }
+
