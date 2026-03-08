@@ -1,4 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  fetchEmergencyCalls,
+  fetchEmergencyCallsByDistrict,
+} from '@/services/emergencyCallService';
+import {
+  fetchServiceRequestStats,
+  fetchServiceRequestTrends,
+} from '@/services/serviceRequestService';
+import { MONTH_ORDER } from '@/lib/dateUtils';
 
 /**
  * Service Layer Tests
@@ -295,5 +304,113 @@ describe('Response Format Normalization', () => {
 
     expect(emptyResponse.status).toBe('empty');
     expect(emptyResponse.data.length).toBe(0);
+  });
+});
+
+/**
+ * Integration Tests - Verify services work end-to-end
+ */
+
+describe('Emergency Call Service Integration', () => {
+  it('should return valid emergency calls data', async () => {
+    const result = await fetchEmergencyCalls();
+
+    expect(Array.isArray(result)).toBe(true);
+
+    // If data exists, verify structure
+    if (result.length > 0) {
+      expect(result[0]).toHaveProperty('month');
+      expect(result[0]).toHaveProperty('call_count');
+      expect(result[0]).toHaveProperty('year');
+    }
+  });
+
+  it('should return district calls with correct format', async () => {
+    const result = await fetchEmergencyCallsByDistrict();
+
+    expect(Array.isArray(result)).toBe(true);
+
+    // Each district should have correct format
+    result.forEach(district => {
+      expect(district).toHaveProperty('district');
+      expect(district).toHaveProperty('calls');
+      expect(district).toHaveProperty('change');
+      // District format should be D1, D2, etc
+      expect(district.district).toMatch(/^D\d+$/);
+    });
+  });
+});
+
+describe('Service Request Service Integration', () => {
+  it('should return valid service request stats', async () => {
+    const result = await fetchServiceRequestStats();
+
+    if (result) {
+      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('open');
+      expect(result).toHaveProperty('resolved');
+      expect(result).toHaveProperty('highPriority');
+      expect(result).toHaveProperty('categoryBreakdown');
+
+      // categoryBreakdown should be array
+      if (result.categoryBreakdown) {
+        expect(Array.isArray(result.categoryBreakdown)).toBe(true);
+        result.categoryBreakdown.forEach(cat => {
+          expect(cat).toHaveProperty('category');
+          expect(cat).toHaveProperty('count');
+          expect(cat).toHaveProperty('percentage');
+        });
+      }
+    }
+  });
+
+  it('should aggregate service request trends by month', async () => {
+    const result = await fetchServiceRequestTrends();
+
+    expect(Array.isArray(result)).toBe(true);
+
+    // Each trend should have month and requests311
+    result.forEach(trend => {
+      expect(trend).toHaveProperty('month');
+      expect(trend).toHaveProperty('requests311');
+      expect(MONTH_ORDER).toContain(trend.month);
+      expect(typeof trend.requests311).toBe('number');
+    });
+  });
+});
+
+describe('Data Source Correctness', () => {
+  it('should NOT confuse 911 and 311 data sources', async () => {
+    const emergencyCalls = await fetchEmergencyCalls();
+    const trends311 = await fetchServiceRequestTrends();
+
+    // 911 calls should have call_count field
+    if (emergencyCalls.length > 0) {
+      expect(emergencyCalls[0]).toHaveProperty('call_count');
+    }
+
+    // 311 trends should have requests311 field (not call_count)
+    if (trends311.length > 0) {
+      expect(trends311[0]).toHaveProperty('requests311');
+      // Should NOT have 911-specific fields
+      expect(trends311[0]).not.toHaveProperty('call_count');
+    }
+  });
+});
+
+describe('Service Error Handling', () => {
+  it('should return array even if services fail gracefully', async () => {
+    const results = await Promise.all([
+      fetchEmergencyCalls(),
+      fetchEmergencyCallsByDistrict(),
+      fetchServiceRequestStats(),
+      fetchServiceRequestTrends(),
+    ]);
+
+    // First 3 should be arrays, 4th can be object or undefined
+    expect(Array.isArray(results[0])).toBe(true);
+    expect(Array.isArray(results[1])).toBe(true);
+    // results[2] is object (stats) or undefined
+    expect(Array.isArray(results[3])).toBe(true);
   });
 });
