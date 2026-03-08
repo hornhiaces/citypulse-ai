@@ -130,9 +130,14 @@ export default function OverviewPage() {
                ))}
              </div>
            </div>
-           <DemoScenarios />
-         </div>
+            <DemoScenarios />
+          </div>
        )}
+
+       {/* Data Sources — visible in both modes */}
+       <div className="mt-6">
+         <DataSourcesPanel />
+       </div>
     </>
   );
 }
