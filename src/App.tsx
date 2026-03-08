@@ -17,6 +17,8 @@ const EconomicPage = lazy(() => import("./pages/EconomicPage"));
 const RecommendationsPage = lazy(() => import("./pages/RecommendationsPage"));
 const TransparencyPage = lazy(() => import("./pages/TransparencyPage"));
 const ROIPage = lazy(() => import("./pages/ROIPage"));
+const SolutionPage = lazy(() => import("./pages/SolutionPage"));
+const SlidesPage = lazy(() => import("./pages/SlidesPage"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -60,6 +62,8 @@ const App = () => (
                 <Route path="/recommendations" element={<RecommendationsPage />} />
                 <Route path="/transparency" element={<TransparencyPage />} />
                 <Route path="/roi" element={<ROIPage />} />
+                <Route path="/solution" element={<SolutionPage />} />
+                <Route path="/slides" element={<SlidesPage />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
