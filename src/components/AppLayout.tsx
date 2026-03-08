@@ -34,7 +34,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </button>
         <Link to="/" className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-sm">CIP AI</span>
+          <span className="font-semibold text-sm">City Pulse AI</span>
         </Link>
         <ModeToggle />
       </header>
@@ -46,7 +46,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Activity className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-sidebar-foreground tracking-tight">Civic Intelligence Platform</h1>
+            <h1 className="text-sm font-bold text-sidebar-foreground tracking-tight">City Pulse AI</h1>
             <p className="text-[10px] text-muted-foreground">Montgomery, AL</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto p-1 text-muted-foreground">
