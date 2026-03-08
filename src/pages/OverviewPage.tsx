@@ -22,6 +22,17 @@ export default function OverviewPage() {
   const { data: requestStats, isLoading: statsLoading } = useServiceRequestStats();
   const { data: requestTrends, isLoading: trendsLoading, error: trendsError } = useServiceRequestTrends();
 
+  // DEBUG
+  console.log('🔍 OverviewPage data:', {
+    emergencyCalls: emergencyCalls?.length || 0,
+    emergencyLoading,
+    emergencyError,
+    districtCalls: districtCalls?.length || 0,
+    requestStats: !!requestStats,
+    requestTrends: requestTrends?.length || 0,
+    trendsLoading,
+  });
+
   const { data: dbRecs } = useQuery({
     queryKey: ['recommendations'],
     queryFn: fetchRecommendations,
