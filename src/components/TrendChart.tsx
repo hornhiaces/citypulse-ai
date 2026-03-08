@@ -54,9 +54,10 @@ function computeForecast(data: Record<string, unknown>[], dataKey: string, month
   return { chartData: merged, forecastStart, changePercent };
 }
 
-export function TrendChart({ title, dataKey, color, description, data, forecastMonths = 3 }: TrendChartProps) {
+export function TrendChart({ title, dataKey, color, description, data, forecastMonths = 3, showForecast = false }: TrendChartProps) {
   const rawData = data || monthlyTrends;
-  const { chartData, forecastStart, changePercent } = computeForecast(rawData as Record<string, unknown>[], dataKey, forecastMonths);
+  const { chartData: forecastChartData, forecastStart, changePercent } = computeForecast(rawData as Record<string, unknown>[], dataKey, forecastMonths);
+  const chartData = showForecast ? forecastChartData : rawData;
   const forecastKey = `${dataKey}_forecast`;
   const isUp = changePercent > 0;
 
