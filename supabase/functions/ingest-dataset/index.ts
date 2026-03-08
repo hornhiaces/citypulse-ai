@@ -242,8 +242,12 @@ serve(async (req) => {
         .from("service_requests_311")
         .upsert(deduped, { onConflict: "case_id", ignoreDuplicates: false })
         .select("id");
-      if (error) errors.push(error.message);
-      else upserted = data.length;
+      if (error) {
+        errors.push(`Failed to upsert service_requests_311: ${error.message}`);
+        upserted = 0;
+      } else {
+        upserted = data?.length || 0;
+      }
     }
 
     if (dataset === "911") {
@@ -273,8 +277,12 @@ serve(async (req) => {
         .from("calls_911_monthly")
         .upsert(deduped, { onConflict: "month,year,district,call_type", ignoreDuplicates: false })
         .select("id");
-      if (error) errors.push(error.message);
-      else upserted = data.length;
+      if (error) {
+        errors.push(`Failed to upsert calls_911_monthly: ${error.message}`);
+        upserted = 0;
+      } else {
+        upserted = data?.length || 0;
+      }
     }
 
     if (dataset === "business_licenses") {
@@ -307,9 +315,16 @@ serve(async (req) => {
         .from("business_licenses")
         .upsert(deduped, { onConflict: "license_number", ignoreDuplicates: false })
         .select("id");
-      if (error) errors.push(error.message);
-      else upserted = data.length;
+      if (error) {
+        errors.push(`Failed to upsert business_licenses: ${error.message}`);
+        upserted = 0;
+      } else {
+        upserted = data?.length || 0;
+      }
     }
+
+    // Check if the upsert had critical errors (inserted 0 rows and there are errors)
+    const hasCriticalError = upserted === 0 && errors.length > 0;
 
     // Update dataset catalog with final count
     const catalogName = dataset === "311" ? "311 Service Requests" : dataset === "911" ? "911 Emergency Calls" : "Business Licenses";
@@ -326,14 +341,23 @@ serve(async (req) => {
       .from("dataset_catalog")
       .update({
         last_ingested_at: new Date().toISOString(),
-        status: errors.length ? "error" : "complete",
+        status: hasCriticalError ? "error" : "complete",
         record_count: totalRecords,
       })
       .eq("name", catalogName);
 
     return new Response(
-      JSON.stringify({ success: true, dataset, inserted: upserted, errors }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        success: !hasCriticalError,
+        dataset,
+        inserted: upserted,
+        errors,
+        totalRecords
+      }),
+      {
+        status: hasCriticalError ? 400 : 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      }
     );
   } catch (err) {
     // Log full error internally for debugging

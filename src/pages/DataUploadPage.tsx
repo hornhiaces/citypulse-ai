@@ -136,6 +136,16 @@ export default function DataUploadPage() {
                   return 0;
                 }
 
+                // Check if the edge function returned an error status
+                if (data?.success === false) {
+                  if (data?.errors?.length) {
+                    errors.push(...data.errors.map((e: string) => `Chunk ${chunkNum}: ${e}`));
+                  } else {
+                    errors.push(`Chunk ${chunkNum}: Insert failed (no data inserted)`);
+                  }
+                  return 0;
+                }
+
                 if (data?.errors?.length) {
                   errors.push(...data.errors.map((e: string) => `Chunk ${chunkNum}: ${e}`));
                 }
