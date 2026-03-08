@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchDistrictScores } from '@/services/districtService';
-import { fetchServiceRequestStats } from '@/services/serviceRequestService';
+import { fetchServiceRequestStats, fetchServiceRequestTrends } from '@/services/serviceRequestService';
 import { fetchEmergencyCalls, fetchEmergencyCallsByDistrict } from '@/services/emergencyCallService';
 import { fetchBusinessLicenseStats, fetchBusinessLicenses } from '@/services/businessLicenseService';
 import { districtScores as fallbackDistricts } from '@/lib/mockData';
@@ -34,6 +34,13 @@ export function useServiceRequestStats() {
   return useQuery({
     queryKey: ['service-request-stats'],
     queryFn: fetchServiceRequestStats,
+  });
+}
+
+export function useServiceRequestTrends() {
+  return useQuery({
+    queryKey: ['service-request-trends'],
+    queryFn: fetchServiceRequestTrends,
   });
 }
 

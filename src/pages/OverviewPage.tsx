@@ -9,7 +9,7 @@ import { useMode } from '@/lib/modeContext';
 import { executiveKpis, citizenKpis, recommendations as fallbackRecs } from '@/lib/mockData';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
-import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
+import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
 import { DemoScenarios } from '@/components/DemoScenarios';
 import { AiInsightPanel } from '@/components/AiInsightPanel';
 import { AskYourCity } from '@/components/AskYourCity';
@@ -20,9 +20,10 @@ export default function OverviewPage() {
   const { isLeadership } = useMode();
   const kpis = isLeadership ? executiveKpis : citizenKpis;
   const { districts } = useDistrictScores();
-  const { data: emergencyCalls } = useEmergencyCalls();
-  const { data: districtCalls } = useEmergencyCallsByDistrict();
+  const { data: emergencyCalls, isLoading: ec911Loading, isError: ec911Error } = useEmergencyCalls();
+  const { data: districtCalls, isLoading: districtLoading, isError: districtError } = useEmergencyCallsByDistrict();
   const { data: requestStats } = useServiceRequestStats();
+  const { data: trendData311Raw, isLoading: trends311Loading, isError: trends311Error } = useServiceRequestTrends();
 
   const { data: dbRecs } = useQuery({
     queryKey: ['recommendations'],
@@ -44,7 +45,7 @@ export default function OverviewPage() {
 
   const priorityDistricts = districts.filter(d => d.publicSafetyPressure === 'HIGH' || d.emergencyDemand === 'RISING');
 
-  // Build trend data
+  // Build 911 trend data from emergency calls (already has normalized months)
   const trendData911 = (() => {
     if (!emergencyCalls?.length) return undefined;
     const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -53,13 +54,8 @@ export default function OverviewPage() {
     return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
-  const trendData311 = (() => {
-    if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const grouped: Record<string, number> = {};
-    emergencyCalls.forEach(c => { grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0); });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, requests311: grouped[m] || 0 }));
-  })();
+  // 311 trend data comes from the dedicated service now
+  const trendData311 = trendData311Raw && trendData311Raw.length > 0 ? trendData311Raw : undefined;
 
   return (
     <>
@@ -82,16 +78,16 @@ export default function OverviewPage() {
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
          <div className="min-h-[280px]">
-           <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} showForecast={isLeadership} />
+           <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} showForecast={isLeadership} isLoading={ec911Loading} isError={ec911Error} />
          </div>
          <div className="min-h-[280px]">
-           <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} showForecast={isLeadership} />
+           <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} showForecast={isLeadership} isLoading={trends311Loading} isError={trends311Error} />
          </div>
        </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
          <div className="min-h-[280px]">
-           <DistrictEmergencyChart data={districtCalls} />
+           <DistrictEmergencyChart data={districtCalls} isLoading={districtLoading} isError={districtError} />
          </div>
          <div className="min-h-[280px]">
            <CategoryBreakdown data={requestStats?.categoryBreakdown} />
@@ -103,12 +99,13 @@ export default function OverviewPage() {
            {isLeadership ? 'Priority Districts' : 'Districts Needing Attention'}
          </h2>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-           {priorityDistricts.map((d, i) => (
+           {priorityDistricts.length > 0 ? priorityDistricts.map((d, i) => (
              <DistrictScoreCard key={d.district} data={d} index={i} />
-           ))}
+           )) : (
+             <p className="text-sm text-muted-foreground col-span-full">No priority districts detected at this time.</p>
+           )}
          </div>
        </div>
-
 
        {isLeadership && (
          <div className="mb-6 space-y-4">
