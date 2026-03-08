@@ -1,10 +1,58 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins - Configure for your deployment
+const ALLOWED_ORIGINS = [
+  "https://citypulse-ai.vercel.app",
+  "https://montgomery-safecity.gov",
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
+    allowed === origin || (allowed.includes("*") && origin.includes(allowed.split("*")[0]))
+  );
+
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "null",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Access-Control-Max-Age": "86400",
+  };
+}
+
+// Rate limiting store (simple in-memory - consider using Deno KV for production)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(
+  clientId: string,
+  maxRequests = 100,
+  windowMs = 3600000 // 1 hour
+): { allowed: boolean; remaining: number; retryAfter: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(clientId);
+
+  if (!record || now > record.resetTime) {
+    // New window
+    rateLimitStore.set(clientId, { count: 1, resetTime: now + windowMs });
+    return { allowed: true, remaining: maxRequests - 1, retryAfter: 0 };
+  }
+
+  if (record.count >= maxRequests) {
+    const retryAfter = Math.ceil((record.resetTime - now) / 1000);
+    return { allowed: false, remaining: 0, retryAfter };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: maxRequests - record.count, retryAfter: 0 };
+}
+
+function getClientId(req: Request): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  return req.headers.get("authorization") || "anonymous";
+}
 
 // Auto-detect dataset type from CSV column headers
 const HEADER_SIGNATURES: Record<string, string[]> = {
@@ -56,11 +104,51 @@ interface IngestPayload {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Check rate limiting
+    const clientId = getClientId(req);
+    const rateLimit = checkRateLimit(clientId, 100, 3600000);
+
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(rateLimit.retryAfter),
+          },
+        }
+      );
+    }
+
+    // Validate Content-Type
+    const contentType = req.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      return new Response(
+        JSON.stringify({ error: "Content-Type must be application/json" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate request size (10MB max)
+    const contentLength = req.headers.get("content-length");
+    const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+    if (contentLength && parseInt(contentLength) > maxSizeBytes) {
+      return new Response(
+        JSON.stringify({ error: "Request too large. Maximum 10MB." }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -69,6 +157,23 @@ serve(async (req) => {
     const body = (await req.json()) as IngestPayload;
     let dataset = body.dataset;
     const records = body.records;
+
+    // Validate records is an array
+    if (!Array.isArray(records)) {
+      return new Response(
+        JSON.stringify({ error: "records must be an array" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit records per request
+    const maxRecords = 10000;
+    if (records.length > maxRecords) {
+      return new Response(
+        JSON.stringify({ error: `Maximum ${maxRecords} records per request` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!records?.length) {
       return new Response(JSON.stringify({ error: "No records provided" }), {
@@ -177,8 +282,17 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    // Log full error internally for debugging
+    console.error("Ingest error:", {
+      timestamp: new Date().toISOString(),
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      clientId: getClientId(req),
+    });
+
+    // Return generic error to client
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
+      JSON.stringify({ error: "An error occurred processing your request. Please try again later." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
