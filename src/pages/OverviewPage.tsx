@@ -13,6 +13,7 @@ import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useS
 import { DemoScenarios } from '@/components/DemoScenarios';
 import { AiInsightPanel } from '@/components/AiInsightPanel';
 import { AskYourCity } from '@/components/AskYourCity';
+import { ForecastSummarySection } from '@/components/ForecastSummarySection';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
