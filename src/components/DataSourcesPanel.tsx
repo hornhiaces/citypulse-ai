@@ -16,13 +16,17 @@ function getIcon(name: string) {
   return Database;
 }
 
+// Known public CSV files for datasets
+const SOURCE_URLS: Record<string, string> = {
+  '911 Emergency Calls': '/data/911_Calls_clean.csv',
+};
+
 interface DatasetInfo {
   name: string;
   description: string | null;
   record_count: number | null;
   status: string | null;
   last_ingested_at: string | null;
-  source_url: string | null;
 }
 
 export function DataSourcesPanel() {
@@ -30,14 +34,14 @@ export function DataSourcesPanel() {
     queryKey: ['dataset-catalog-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('dataset_catalog')
-        .select('name, description, record_count, status, last_ingested_at, source_url')
+        .from('vw_dataset_catalog_public' as any)
+        .select('name, description, record_count, status, last_ingested_at')
         .eq('status', 'complete')
         .order('name');
       if (error) throw error;
       // Deduplicate by name (keep first)
       const seen = new Set<string>();
-      return (data || []).filter(d => {
+      return (data || []).filter((d: any) => {
         if (seen.has(d.name)) return false;
         seen.add(d.name);
         return true;
