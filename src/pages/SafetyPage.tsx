@@ -40,18 +40,22 @@ export default function SafetyPage() {
     const totalPrev = prevCalls.reduce((s, c) => s + (c.call_count || 0), 0);
     const changePct = totalPrev ? Math.round(((totalCurrent - totalPrev) / totalPrev) * 100 * 10) / 10 : 0;
 
-    const withResponse = latestCalls.filter(c => c.avg_response_minutes);
-    const avgResponse = withResponse.length > 0
-      ? withResponse.reduce((s, c) => s + (c.avg_response_minutes || 0), 0) / withResponse.length
-      : 0;
+    // Emergency vs Non-Emergency breakdown
+    const emergencyTotal = latestCalls
+      .filter(c => c.call_type === 'Emergency')
+      .reduce((s, c) => s + (c.call_count || 0), 0);
+    const nonEmergencyTotal = latestCalls
+      .filter(c => c.call_type === 'Non-Emergency')
+      .reduce((s, c) => s + (c.call_count || 0), 0);
+    const emergencyRate = totalCurrent > 0 ? Math.round((emergencyTotal / totalCurrent) * 1000) / 10 : 0;
 
     const highRiskCount = districts.filter(d => d.publicSafetyPressure === 'HIGH').length;
 
     return [
       { label: `911 Calls (${latestMonth})`, value: totalCurrent.toLocaleString(), change: changePct, trend: changePct > 0 ? 'up' as const : changePct < 0 ? 'down' as const : 'stable' as const, icon: 'phone' },
-      { label: 'Avg Response Time', value: avgResponse > 0 ? `${avgResponse.toFixed(1)} min` : '—', change: 0, trend: 'stable' as const, icon: 'clock' },
+      { label: `Emergency Calls (${latestMonth})`, value: emergencyTotal.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'phone' },
       { label: 'High-Risk Districts', value: String(highRiskCount), change: 0, trend: 'stable' as const, icon: 'alert' },
-      { label: 'P1 Incidents', value: latestCalls.reduce((s, c) => s + (c.priority_1_count || 0), 0).toLocaleString(), change: 0, trend: 'stable' as const, icon: 'alert' },
+      { label: 'Emergency Rate', value: `${emergencyRate}%`, change: 0, trend: 'stable' as const, icon: 'alert' },
     ];
   })();
 
