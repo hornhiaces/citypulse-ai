@@ -128,10 +128,10 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                   <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.6} />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 11, fill: 'hsl(var(--foreground))', opacity: 0.8 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value: string, index: number) => {
@@ -141,7 +141,7 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                   return value;
                 }}
               />
-              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--foreground))', opacity: 0.7 }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
@@ -175,7 +175,7 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                 </>
               )}
               <Legend
-                wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '8px', color: 'hsl(var(--foreground))' }}
                 formatter={(value: string) => {
                   const labels: Record<string, string> = {
                     resolved: 'Resolved',

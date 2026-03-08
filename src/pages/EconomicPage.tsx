@@ -170,9 +170,9 @@ export default function EconomicPage() {
               <div className="w-1/2 space-y-1.5 pl-2">
                 {pieData.map((d, i) => (
                   <div key={d.name} className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="text-[10px] text-muted-foreground truncate flex-1">{d.name}</span>
-                    <span className="text-[10px] font-mono text-foreground">{d.value.toLocaleString()}</span>
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                    <span className="text-[11px] text-foreground/75 truncate flex-1">{d.name}</span>
+                    <span className="text-[11px] font-mono text-foreground">{d.value.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
