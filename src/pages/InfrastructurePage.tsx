@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/PageHeader';
 import { KpiCard } from '@/components/KpiCard';
 import { CategoryBreakdown } from '@/components/CategoryBreakdown';
-import { TrendChart } from '@/components/TrendChart';
+import { ServiceRequestTrendChart } from '@/components/ServiceRequestTrendChart';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { useMode } from '@/lib/modeContext';
 import { useDistrictScores, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
