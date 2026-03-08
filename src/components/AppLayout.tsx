@@ -17,7 +17,6 @@ const navItems = [
   { path: '/economic', label: 'Economic Signals', icon: DollarSign },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
   { path: '/transparency', label: 'Transparency', icon: Eye },
-  { path: '/upload', label: 'Data Upload', icon: Upload },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
