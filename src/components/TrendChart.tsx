@@ -10,12 +10,18 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ title, dataKey, color, description, data }: TrendChartProps) {
-  const chartData = data || monthlyTrends;
+  const chartData = data ?? monthlyTrends;
+  const isEmpty = data && data.length === 0;
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
       {description && <p className="text-xs text-muted-foreground mb-4">{description}</p>}
+      {isEmpty ? (
+        <div className="h-48 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">No data available for this period</p>
+        </div>
+      ) : (
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
@@ -41,6 +47,7 @@ export function TrendChart({ title, dataKey, color, description, data }: TrendCh
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      )}
     </div>
   );
 }

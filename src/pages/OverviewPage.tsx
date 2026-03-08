@@ -49,13 +49,11 @@ export default function OverviewPage() {
     return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
-  const trendData311 = (() => {
-    if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const grouped: Record<string, number> = {};
-    emergencyCalls.forEach(c => { grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0); });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, requests311: grouped[m] || 0 }));
-  })();
+  // 311 trend data requires monthly aggregation of service_requests_311 table
+  // Currently service_requests_311 has raw events without monthly grouping
+  // TODO: Create DB view for monthly 311 aggregation or add to service layer
+  // For now, return undefined to show empty state instead of fake 911 data
+  const trendData311 = undefined;
 
   return (
     <>
