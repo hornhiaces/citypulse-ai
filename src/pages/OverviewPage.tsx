@@ -88,6 +88,10 @@ export default function OverviewPage() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <ForecastSummarySection />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div className="min-h-[280px]">
           <DistrictEmergencyChart data={districtCalls} />
