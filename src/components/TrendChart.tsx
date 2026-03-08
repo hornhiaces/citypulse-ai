@@ -13,10 +13,10 @@ export function TrendChart({ title, dataKey, color, description, data }: TrendCh
   const chartData = data || monthlyTrends;
 
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card p-5 h-full flex flex-col">
       <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
       {description && <p className="text-xs text-muted-foreground mb-4">{description}</p>}
-      <div className="h-48">
+      <div className="h-48 flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
