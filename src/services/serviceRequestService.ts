@@ -5,16 +5,49 @@ export async function fetchServiceRequests(filters?: { district?: number; status
   if (filters?.district) query = query.eq('district', filters.district);
   if (filters?.status) query = query.eq('status', filters.status);
   if (filters?.category) query = query.eq('category', filters.category);
-  const { data, error } = await query.order('created_date', { ascending: false });
+  const { data, error } = await query.order('created_date', { ascending: false }).limit(1000);
   if (error) throw error;
   return data;
 }
 
+/** Fetch all rows in batches to bypass the 1000-row default limit */
+async function fetchAllRows<T>(
+  tableName: string,
+  selectCols: string,
+  filters?: Record<string, string>,
+  orderCol = 'created_date',
+): Promise<T[]> {
+  const PAGE_SIZE = 1000;
+  let offset = 0;
+  let allData: T[] = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    let query = supabase.from(tableName).select(selectCols);
+    if (filters) {
+      for (const [key, value] of Object.entries(filters)) {
+        query = query.gte(key, value);
+      }
+    }
+    const { data, error } = await query
+      .order(orderCol, { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      hasMore = false;
+    } else {
+      allData = allData.concat(data as T[]);
+      offset += PAGE_SIZE;
+      if (data.length < PAGE_SIZE) hasMore = false;
+    }
+  }
+  return allData;
+}
+
 export async function fetchServiceRequestStats() {
-  const { data, error } = await supabase
-    .from('service_requests_311')
-    .select('category, status, district, priority');
-  if (error) throw error;
+  const data = await fetchAllRows<{
+    category: string; status: string | null; district: number | null; priority: string | null;
+  }>('service_requests_311', 'category, status, district, priority');
 
   const total = data.length;
   const open = data.filter(r => r.status === 'open').length;
@@ -35,20 +68,18 @@ export async function fetchServiceRequestStats() {
 
 /**
  * Fetch 311 service requests aggregated by month with breakdown for rich charting.
- * Returns last 12 months: { month, total, resolved, open }
+ * Returns last 12 months: { month, requests311, resolved, open, resolutionRate }
  */
 export async function fetchServiceRequestTrends() {
-  const { data, error } = await supabase
-    .from('service_requests_311')
-    .select('created_date, status')
-    .gte('created_date', '2024-01-01')
-    .order('created_date', { ascending: true });
+  const data = await fetchAllRows<{ created_date: string; status: string | null }>(
+    'service_requests_311',
+    'created_date, status',
+    { created_date: '2024-01-01' },
+  );
 
-  if (error) throw error;
   if (!data?.length) return [];
 
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
   const grouped: Record<string, { total: number; resolved: number; open: number }> = {};
 
   data.forEach(r => {
@@ -57,7 +88,7 @@ export async function fetchServiceRequestTrends() {
     if (!grouped[key]) grouped[key] = { total: 0, resolved: 0, open: 0 };
     grouped[key].total += 1;
     if (r.status === 'resolved') grouped[key].resolved += 1;
-    else grouped[key].open += 1; // open + in_progress grouped as "open"
+    else grouped[key].open += 1;
   });
 
   const sorted = Object.entries(grouped)
