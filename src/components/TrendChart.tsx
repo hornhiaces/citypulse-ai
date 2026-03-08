@@ -65,7 +65,7 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
     <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        {changePercent !== 0 && (
+        {showForecast && changePercent !== 0 && (
           <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${isUp ? 'bg-destructive/10 text-destructive' : 'bg-emerald-500/10 text-emerald-400'}`}>
             <TrendingUp className={`w-3 h-3 ${!isUp ? 'rotate-180' : ''}`} />
             <span>{isUp ? '+' : ''}{changePercent}% forecast</span>
