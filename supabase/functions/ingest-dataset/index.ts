@@ -5,6 +5,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const ALLOWED_ORIGINS = [
   "https://citypulse-ai.vercel.app",
   "https://montgomery-safecity.gov",
+  "https://lovable.dev",
+  "http://localhost:3000",
+  "http://localhost:5173",
 ];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
@@ -216,9 +219,18 @@ serve(async (req) => {
         source: r.source || r.Source || r.SOURCE || "import",
       }));
 
+      // Deduplicate by case_id to avoid "cannot affect row a second time" error
+      const seen = new Set<string | null>();
+      const deduped = cleaned.reverse().filter(r => {
+        const key = r.case_id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).reverse();
+
       const { data, error } = await supabase
         .from("service_requests_311")
-        .upsert(cleaned, { onConflict: "case_id", ignoreDuplicates: false })
+        .upsert(deduped, { onConflict: "case_id", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
       else upserted = data.length;
@@ -238,9 +250,18 @@ serve(async (req) => {
         change_pct: parseFloat(r.change_pct || r.ChangePct || r.CHANGE_PCT) || 0,
       }));
 
+      // Deduplicate by composite key to avoid "cannot affect row a second time" error
+      const seen = new Set<string>();
+      const deduped = cleaned.reverse().filter(r => {
+        const key = `${r.month}|${r.year}|${r.district}|${r.call_type}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).reverse();
+
       const { data, error } = await supabase
         .from("calls_911_monthly")
-        .upsert(cleaned, { onConflict: "month,year,district,call_type", ignoreDuplicates: false })
+        .upsert(deduped, { onConflict: "month,year,district,call_type", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
       else upserted = data.length;
@@ -261,9 +282,18 @@ serve(async (req) => {
         expiry_date: r.expiry_date || r.ExpiryDate || r.EXPIRY_DATE || null,
       }));
 
+      // Deduplicate by license_number to avoid "cannot affect row a second time" error
+      const seen = new Set<string | null>();
+      const deduped = cleaned.reverse().filter(r => {
+        const key = r.license_number;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).reverse();
+
       const { data, error } = await supabase
         .from("business_licenses")
-        .upsert(cleaned, { onConflict: "license_number", ignoreDuplicates: false })
+        .upsert(deduped, { onConflict: "license_number", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
       else upserted = data.length;
