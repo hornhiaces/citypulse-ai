@@ -108,22 +108,55 @@ export default function DataUploadPage() {
           const errors: string[] = [];
           const chunks = Math.ceil(total / CHUNK_SIZE);
 
+          // Helper: Retry with exponential backoff
+          const sendChunkWithRetry = async (chunkNum: number, recordsChunk: Record<string, unknown>[], maxRetries = 3) => {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+              try {
+                // Add delay between requests to avoid overwhelming connection (100ms base)
+                if (chunkNum > 0) await new Promise(r => setTimeout(r, 100));
+
+                const { data, error } = await supabase.functions.invoke('ingest-dataset', {
+                  body: {
+                    ...(fu.detectedType ? { dataset: fu.detectedType } : {}),
+                    columns,
+                    records: recordsChunk,
+                  },
+                });
+
+                if (error) {
+                  if (attempt < maxRetries && error.message?.includes('connection')) {
+                    // Retry on connection errors with exponential backoff
+                    const delayMs = Math.pow(2, attempt - 1) * 500; // 500ms, 1s, 2s
+                    await new Promise(r => setTimeout(r, delayMs));
+                    continue;
+                  }
+                  errors.push(`Chunk ${chunkNum}: ${error.message}`);
+                  return 0;
+                }
+
+                if (data?.errors?.length) {
+                  errors.push(...data.errors.map((e: string) => `Chunk ${chunkNum}: ${e}`));
+                }
+                return data?.inserted || 0;
+              } catch (err) {
+                if (attempt < maxRetries && err instanceof Error && err.message.includes('connection')) {
+                  // Retry on connection errors with exponential backoff
+                  const delayMs = Math.pow(2, attempt - 1) * 500;
+                  await new Promise(r => setTimeout(r, delayMs));
+                  continue;
+                }
+                errors.push(`Chunk ${chunkNum}: ${err instanceof Error ? err.message : String(err)}`);
+                return 0;
+              }
+            }
+            return 0;
+          };
+
+          // Process chunks sequentially with retry
           for (let i = 0; i < chunks; i++) {
             const chunk = records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-            try {
-              const { data, error } = await supabase.functions.invoke('ingest-dataset', {
-                body: {
-                  ...(fu.detectedType ? { dataset: fu.detectedType } : {}),
-                  columns,
-                  records: chunk,
-                },
-              });
-              if (error) errors.push(`Chunk ${i + 1}: ${error.message}`);
-              else if (data?.errors?.length) errors.push(...data.errors.map((e: string) => `Chunk ${i + 1}: ${e}`));
-              inserted += data?.inserted || 0;
-            } catch (err) {
-              errors.push(`Chunk ${i + 1}: ${err instanceof Error ? err.message : String(err)}`);
-            }
+            const chunkInserted = await sendChunkWithRetry(i + 1, chunk);
+            inserted += chunkInserted;
 
             const progress = Math.round(((i + 1) / chunks) * 100);
             setFiles(prev => prev.map(f => f.id === fu.id ? { ...f, progress, insertedRows: inserted } : f));
