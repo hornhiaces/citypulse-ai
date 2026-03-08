@@ -10,33 +10,24 @@ export async function fetchServiceRequests(filters?: { district?: number; status
   return data;
 }
 
-/** Fetch all rows in batches to bypass the 1000-row default limit */
-async function fetchAllRows<T>(
-  tableName: string,
-  selectCols: string,
-  filters?: Record<string, string>,
-  orderCol = 'created_date',
-): Promise<T[]> {
+/** Paginate through service_requests_311 to get all rows for a given select */
+async function fetchAll311<T>(selectCols: string, minDate?: string): Promise<T[]> {
   const PAGE_SIZE = 1000;
   let offset = 0;
   let allData: T[] = [];
   let hasMore = true;
 
   while (hasMore) {
-    let query = supabase.from(tableName).select(selectCols);
-    if (filters) {
-      for (const [key, value] of Object.entries(filters)) {
-        query = query.gte(key, value);
-      }
-    }
+    let query = supabase.from('service_requests_311').select(selectCols);
+    if (minDate) query = query.gte('created_date', minDate);
     const { data, error } = await query
-      .order(orderCol, { ascending: true })
+      .order('created_date', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
     if (error) throw error;
     if (!data || data.length === 0) {
       hasMore = false;
     } else {
-      allData = allData.concat(data as T[]);
+      allData = allData.concat(data as unknown as T[]);
       offset += PAGE_SIZE;
       if (data.length < PAGE_SIZE) hasMore = false;
     }
@@ -45,9 +36,9 @@ async function fetchAllRows<T>(
 }
 
 export async function fetchServiceRequestStats() {
-  const data = await fetchAllRows<{
+  const data = await fetchAll311<{
     category: string; status: string | null; district: number | null; priority: string | null;
-  }>('service_requests_311', 'category, status, district, priority');
+  }>('category, status, district, priority');
 
   const total = data.length;
   const open = data.filter(r => r.status === 'open').length;
@@ -66,15 +57,10 @@ export async function fetchServiceRequestStats() {
   return { total, open, resolved, inProgress, highPriority, categoryBreakdown };
 }
 
-/**
- * Fetch 311 service requests aggregated by month with breakdown for rich charting.
- * Returns last 12 months: { month, requests311, resolved, open, resolutionRate }
- */
 export async function fetchServiceRequestTrends() {
-  const data = await fetchAllRows<{ created_date: string; status: string | null }>(
-    'service_requests_311',
+  const data = await fetchAll311<{ created_date: string; status: string | null }>(
     'created_date, status',
-    { created_date: '2024-01-01' },
+    '2024-01-01',
   );
 
   if (!data?.length) return [];
