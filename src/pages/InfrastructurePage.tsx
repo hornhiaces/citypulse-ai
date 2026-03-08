@@ -4,7 +4,7 @@ import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { TrendChart } from '@/components/TrendChart';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { useMode } from '@/lib/modeContext';
-import { useDistrictScores, useServiceRequestStats, useEmergencyCalls } from '@/hooks/useDistrictData';
+import { useDistrictScores, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
 import type { KpiData } from '@/lib/mockData';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -12,7 +12,7 @@ export default function InfrastructurePage() {
   const { isLeadership } = useMode();
   const { districts, isLoading: districtsLoading } = useDistrictScores();
   const { data: stats } = useServiceRequestStats();
-  const { data: emergencyCalls } = useEmergencyCalls();
+  const { data: trendData311, isLoading: trendsLoading, isError: trendsError } = useServiceRequestTrends();
 
   const infraKpis: KpiData[] = (() => {
     if (!stats) {
@@ -32,19 +32,8 @@ export default function InfrastructurePage() {
     ];
   })();
 
-  // Build 311 trend data
-  const trendData = (() => {
-    if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const grouped: Record<string, number> = {};
-    emergencyCalls.forEach(c => {
-      grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0);
-    });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, requests311: grouped[m] || 0 }));
-  })();
-
+  const trendData = trendData311 && trendData311.length > 0 ? trendData311 : undefined;
   const categoryData = stats?.categoryBreakdown;
-
   const stressedDistricts = districts.filter(d => d.infrastructureStress === 'HIGH');
 
   return (
@@ -60,7 +49,7 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} />
+        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} isLoading={trendsLoading} isError={trendsError} />
         <CategoryBreakdown data={categoryData} />
       </div>
 
