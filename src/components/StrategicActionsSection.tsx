@@ -143,6 +143,8 @@ Then after the JSON, add a paragraph starting with "RATIONALE:" explaining the o
 
   const briefRationale = aiRationale.split('. ').slice(0, 2).join('. ') + (aiRationale.includes('. ') ? '.' : '');
 
+  if (loading || actions.length === 0) return null;
+
   return (
     <>
       <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
