@@ -119,4 +119,4 @@ Try it yourself:
 
 *"Every city deserves to think smarter. Every citizen deserves to see how."*
 
-[Team name & contact info]
+**Team-theGump** — Larry Salinas · Kathiravan Kamatchi

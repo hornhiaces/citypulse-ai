@@ -283,4 +283,11 @@ Built for the GenAI Works Hackathon 2026.
 
 ## 👥 Team
 
-*[Team details to be added]*
+**Team-theGump**
+
+| Member | Role |
+|--------|------|
+| Larry Salinas | Developer |
+| Kathiravan Kamatchi | Developer |
+
+Built for GenAI Works Hackathon 2026 — Montgomery, AL
