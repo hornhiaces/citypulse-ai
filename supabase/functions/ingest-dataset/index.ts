@@ -219,11 +219,11 @@ serve(async (req) => {
         priority: normalizePriority(r.priority || r.Priority || r.PRIORITY),
         district: parseDistrict(r.district || r.District || r.DISTRICT),
         address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
+        latitude: (() => { const n = parseFloat(r.latitude || r.Latitude || r.LATITUDE); return isNaN(n) ? null : n; })(),
+        longitude: (() => { const n = parseFloat(r.longitude || r.Longitude || r.LONGITUDE); return isNaN(n) ? null : n; })(),
         created_date: r.created_date || r.CreatedDate || r.created || r.CREATED_DATE || new Date().toISOString(),
         resolved_date: r.resolved_date || r.ResolvedDate || r.RESOLVED_DATE || null,
-        resolution_days: parseInt(r.resolution_days || r.ResolutionDays || r.RESOLUTION_DAYS) || null,
+        resolution_days: (() => { const n = parseInt(r.resolution_days || r.ResolutionDays || r.RESOLUTION_DAYS); return isNaN(n) ? null : n; })(),
         source: r.source || r.Source || r.SOURCE || "import",
       }));
 
@@ -249,15 +249,15 @@ serve(async (req) => {
     if (dataset === "911") {
       const cleaned = records.map((r: any) => ({
         month: normalizeMonth(r.month || r.Month || r.MONTH),
-        year: parseInt(r.year || r.Year || r.YEAR),
+        year: (() => { const n = parseInt(r.year || r.Year || r.YEAR); return isNaN(n) ? 0 : n; })(),
         district: parseDistrict(r.district || r.District || r.DISTRICT),
         call_type: r.call_type || r.CallType || r.CALL_TYPE || "All",
-        call_count: parseInt(r.call_count || r.CallCount || r.CALL_COUNT) || 0,
-        avg_response_minutes: parseFloat(r.avg_response_minutes || r.AvgResponse || r.AVG_RESPONSE_MINUTES) || null,
-        priority_1_count: parseInt(r.priority_1_count || r.P1 || r.PRIORITY_1_COUNT) || 0,
-        priority_2_count: parseInt(r.priority_2_count || r.P2 || r.PRIORITY_2_COUNT) || 0,
-        priority_3_count: parseInt(r.priority_3_count || r.P3 || r.PRIORITY_3_COUNT) || 0,
-        change_pct: parseFloat(r.change_pct || r.ChangePct || r.CHANGE_PCT) || 0,
+        call_count: (() => { const n = parseInt(r.call_count || r.CallCount || r.CALL_COUNT); return isNaN(n) ? 0 : n; })(),
+        avg_response_minutes: (() => { const n = parseFloat(r.avg_response_minutes || r.AvgResponse || r.AVG_RESPONSE_MINUTES); return isNaN(n) ? null : n; })(),
+        priority_1_count: (() => { const n = parseInt(r.priority_1_count || r.P1 || r.PRIORITY_1_COUNT); return isNaN(n) ? 0 : n; })(),
+        priority_2_count: (() => { const n = parseInt(r.priority_2_count || r.P2 || r.PRIORITY_2_COUNT); return isNaN(n) ? 0 : n; })(),
+        priority_3_count: (() => { const n = parseInt(r.priority_3_count || r.P3 || r.PRIORITY_3_COUNT); return isNaN(n) ? 0 : n; })(),
+        change_pct: (() => { const n = parseFloat(r.change_pct || r.ChangePct || r.CHANGE_PCT); return isNaN(n) ? 0 : n; })(),
       }));
 
       // Deduplicate by composite key to avoid "cannot affect row a second time" error
@@ -285,8 +285,8 @@ serve(async (req) => {
         category: r.category || r.Category || r.CATEGORY || null,
         district: parseDistrict(r.district || r.District || r.DISTRICT),
         address: r.address || r.Address || r.ADDRESS || null,
-        latitude: parseFloat(r.latitude || r.Latitude || r.LATITUDE) || null,
-        longitude: parseFloat(r.longitude || r.Longitude || r.LONGITUDE) || null,
+        latitude: (() => { const n = parseFloat(r.latitude || r.Latitude || r.LATITUDE); return isNaN(n) ? null : n; })(),
+        longitude: (() => { const n = parseFloat(r.longitude || r.Longitude || r.LONGITUDE); return isNaN(n) ? null : n; })(),
         status: r.status || r.Status || r.STATUS || "active",
         issue_date: r.issue_date || r.IssueDate || r.ISSUE_DATE || null,
         expiry_date: r.expiry_date || r.ExpiryDate || r.EXPIRY_DATE || null,
