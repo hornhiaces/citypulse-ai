@@ -57,14 +57,18 @@ export function DistrictEmergencyChart({ data, isLoading, isError }: DistrictEme
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
+                  backgroundColor: 'hsl(var(--popover))',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                   fontSize: '12px',
-                  color: 'hsl(var(--foreground))',
+                  color: 'hsl(var(--popover-foreground))',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
                 }}
+                labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 600, marginBottom: '2px' }}
+                itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
                 formatter={(value: number, name: string) => [value.toLocaleString(), name === 'calls' ? 'Est. Calls' : name]}
                 labelFormatter={(label) => label}
+                cursor={{ fill: 'hsl(var(--accent) / 0.15)' }}
               />
               <Bar dataKey="calls" radius={[4, 4, 0, 0]}>
                 {data.map((entry, index) => (
