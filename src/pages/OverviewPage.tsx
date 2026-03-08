@@ -90,8 +90,9 @@ export default function OverviewPage() {
       </div>
 
       {isLeadership && (
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <ForecastSummarySection />
+          <StrategicActionsSection />
         </div>
       )}
 
