@@ -46,7 +46,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Activity className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-sidebar-foreground tracking-tight">SafeCity AI</h1>
+            <h1 className="text-sm font-bold text-sidebar-foreground tracking-tight">Civic Intelligence Platform</h1>
             <p className="text-[10px] text-muted-foreground">Montgomery, AL</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto p-1 text-muted-foreground">
