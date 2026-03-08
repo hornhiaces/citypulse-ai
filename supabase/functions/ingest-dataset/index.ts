@@ -316,16 +316,18 @@ serve(async (req) => {
     const tableName = dataset === "311" ? "service_requests_311" : dataset === "911" ? "calls_911_monthly" : "business_licenses";
 
     // Get current record count from the table
-    const { count } = await supabase
+    const countResult = await supabase
       .from(tableName)
       .select("*", { count: "exact", head: true });
+
+    const totalRecords = countResult.count ?? 0;
 
     await supabase
       .from("dataset_catalog")
       .update({
         last_ingested_at: new Date().toISOString(),
         status: errors.length ? "error" : "complete",
-        record_count: count || 0,
+        record_count: totalRecords,
       })
       .eq("name", catalogName);
 
