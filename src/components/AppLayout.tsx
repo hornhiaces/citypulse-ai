@@ -15,6 +15,7 @@ const navItems = [
   { path: '/safety', label: 'Public Safety', icon: Shield },
   { path: '/infrastructure', label: 'Infrastructure', icon: Wrench },
   { path: '/economic', label: 'Economic Signals', icon: DollarSign },
+  { path: '/roi', label: 'ROI Quick Wins', icon: BadgeDollarSign, leadershipOnly: true },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
   { path: '/transparency', label: 'Transparency', icon: Eye },
 ];
