@@ -150,4 +150,23 @@
   .score-badge-stable {
     @apply score-badge bg-cyan-500/15 text-cyan-400 border border-cyan-500/20;
   }
+
+  /* Leaflet overrides */
+  .leaflet-container {
+    background: hsl(var(--background)) !important;
+    font-family: inherit;
+  }
+  .leaflet-popup-content-wrapper {
+    background: hsl(var(--popover)) !important;
+    color: hsl(var(--popover-foreground)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+  }
+  .leaflet-popup-tip {
+    background: hsl(var(--popover)) !important;
+  }
+  .leaflet-popup-close-button {
+    color: hsl(var(--muted-foreground)) !important;
+  }
 }
