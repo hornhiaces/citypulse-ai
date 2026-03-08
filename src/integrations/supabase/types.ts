@@ -489,6 +489,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_dataset_catalog_public: {
+        Row: {
+          completion_rate: number | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          ingestion_source: string | null
+          last_ingested_at: string | null
+          missing_rows: number | null
+          name: string | null
+          record_count: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completion_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          ingestion_source?: string | null
+          last_ingested_at?: string | null
+          missing_rows?: number | null
+          name?: string | null
+          record_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completion_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          ingestion_source?: string | null
+          last_ingested_at?: string | null
+          missing_rows?: number | null
+          name?: string | null
+          record_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       vw_ingestion_summary: {
         Row: {
           avg_completion_rate: number | null
@@ -499,6 +541,54 @@ export type Database = {
           successful_ingestions: number | null
           total_attempts: number | null
           total_missing_rows: number | null
+        }
+        Relationships: []
+      }
+      vw_service_requests_311_public: {
+        Row: {
+          case_id: string | null
+          category: string | null
+          created_at: string | null
+          created_date: string | null
+          description: string | null
+          district: number | null
+          id: string | null
+          priority: string | null
+          resolution_days: number | null
+          resolved_date: string | null
+          source: string | null
+          status: string | null
+          subcategory: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_date?: string | null
+          description?: string | null
+          district?: number | null
+          id?: string | null
+          priority?: string | null
+          resolution_days?: number | null
+          resolved_date?: string | null
+          source?: string | null
+          status?: string | null
+          subcategory?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_date?: string | null
+          description?: string | null
+          district?: number | null
+          id?: string | null
+          priority?: string | null
+          resolution_days?: number | null
+          resolved_date?: string | null
+          source?: string | null
+          status?: string | null
+          subcategory?: string | null
         }
         Relationships: []
       }
