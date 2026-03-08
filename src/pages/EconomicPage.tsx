@@ -49,11 +49,11 @@ export default function EconomicPage() {
         { label: 'Renewal-to-New Ratio', value: '—', change: 0, trend: 'stable' as const, icon: 'clipboard' },
       ];
     }
-    const ratio = stats.newLicenses > 0 ? (stats.renewals / stats.newLicenses).toFixed(1) : '—';
+    const ratio = (stats.newLicenses ?? 0) > 0 ? ((stats.renewals ?? 0) / stats.newLicenses!).toFixed(1) : '—';
     return [
       { label: 'Active Business Licenses', value: stats.active.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'building' },
-      { label: 'New Licenses Issued', value: stats.newLicenses.toLocaleString(), change: 0, trend: 'up' as const, icon: 'thumbs-up' },
-      { label: 'License Renewals', value: stats.renewals.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'check' },
+      { label: 'New Licenses Issued', value: (stats.newLicenses ?? 0).toLocaleString(), change: 0, trend: 'up' as const, icon: 'thumbs-up' },
+      { label: 'License Renewals', value: (stats.renewals ?? 0).toLocaleString(), change: 0, trend: 'stable' as const, icon: 'check' },
       { label: 'Renewal-to-New Ratio', value: `${ratio}:1`, change: 0, trend: 'stable' as const, icon: 'clipboard' },
     ];
   })();
