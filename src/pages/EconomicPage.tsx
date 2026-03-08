@@ -4,6 +4,7 @@ import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { LicenseTrendChart } from '@/components/LicenseTrendChart';
 import { DistrictEconomicMatrix } from '@/components/DistrictEconomicMatrix';
 import { EconomicInsightPanel } from '@/components/EconomicInsightPanel';
+import { EconomicROIPanel } from '@/components/EconomicROIPanel';
 import { useMode } from '@/lib/modeContext';
 import {
   useDistrictScores,
@@ -98,6 +99,13 @@ export default function EconomicPage() {
       {isLeadership && (
         <div className="mb-6">
           <EconomicInsightPanel districts={districts} stats={stats} />
+        </div>
+      )}
+
+      {/* Leadership: ROI Quick Wins */}
+      {isLeadership && (
+        <div className="mb-6">
+          <EconomicROIPanel districts={districts} stats={stats} />
         </div>
       )}
 
