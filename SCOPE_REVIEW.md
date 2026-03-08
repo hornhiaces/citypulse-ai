@@ -107,7 +107,17 @@ Complete with role-based views (Leadership vs. Citizen):
 - ✅ Vector embeddings for RAG
 - ✅ District signal analysis
 - ✅ Recommendation generation
+- ✅ AI Insight Panel on Overview (live AI-generated bullet summaries)
 
+### Sprint 3.1: Mobile Responsiveness ✅
+- ✅ Responsive padding and typography scaling (sm/lg breakpoints)
+- ✅ Mobile-friendly KPI cards with compact padding
+- ✅ Responsive briefing panel height (viewport-based on mobile)
+- ✅ Flex-wrap for badge rows on upload and recommendation cards
+- ✅ Responsive sector chart labels on Economic page
+- ✅ Mobile-ordered layout on Briefing page (suggestions first)
+- ✅ Viewport-constrained district list on Map page
+- ✅ Responsive heatmap detail grid
 ---
 
 ## Updated Scope: What's Complete

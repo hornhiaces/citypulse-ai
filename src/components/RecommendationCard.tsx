@@ -29,11 +29,11 @@ export function RecommendationCard({ data, index }: { data: Recommendation; inde
           <Icon className={`h-4 w-4 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1">
             <span className={`text-xs font-mono uppercase ${config.color}`}>{data.priority}</span>
             <span className="text-xs text-muted-foreground">· {data.category}</span>
             {isLeadership && (
-              <span className="text-xs font-mono text-muted-foreground ml-auto">{Math.round(data.confidence * 100)}% confidence</span>
+              <span className="text-xs font-mono text-muted-foreground sm:ml-auto">{Math.round(data.confidence * 100)}% confidence</span>
             )}
           </div>
           <h3 className="text-sm font-semibold text-foreground">{data.title}</h3>

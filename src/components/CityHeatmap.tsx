@@ -96,7 +96,7 @@ export function CityHeatmap({ districts }: CityHeatmapProps) {
         >
           <h4 className="text-sm font-semibold text-foreground">District {selectedDistrict.district}: {selectedDistrict.name}</h4>
           <p className="text-xs text-muted-foreground mb-3">{selectedDistrict.area} · Pop. {selectedDistrict.population.toLocaleString()}</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
               { label: 'Safety', value: selectedDistrict.publicSafetyPressure },
               { label: 'Infrastructure', value: selectedDistrict.infrastructureStress },

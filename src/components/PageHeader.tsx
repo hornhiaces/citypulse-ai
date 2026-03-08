@@ -19,7 +19,7 @@ export function PageHeader({ title, subtitle, badge }: PageHeaderProps) {
           {badge}
         </span>
       )}
-      <h1 className="text-2xl font-bold text-foreground tracking-tight">{title}</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{title}</h1>
       <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
     </motion.div>
   );
