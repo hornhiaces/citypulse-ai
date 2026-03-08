@@ -3,6 +3,7 @@ import { KpiCard } from '@/components/KpiCard';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { RecommendationCard } from '@/components/RecommendationCard';
 import { TrendChart } from '@/components/TrendChart';
+import { ServiceRequestTrendChart } from '@/components/ServiceRequestTrendChart';
 import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { DistrictEmergencyChart } from '@/components/DistrictEmergencyChart';
 import { useMode } from '@/lib/modeContext';
