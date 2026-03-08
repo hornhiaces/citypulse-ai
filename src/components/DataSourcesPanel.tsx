@@ -39,9 +39,8 @@ export function DataSourcesPanel() {
         .eq('status', 'complete')
         .order('name');
       if (error) throw error;
-      // Deduplicate by name (keep first)
       const seen = new Set<string>();
-      return (data || []).filter((d: any) => {
+      return ((data as any[]) || []).filter((d: any) => {
         if (seen.has(d.name)) return false;
         seen.add(d.name);
         return true;
