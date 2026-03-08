@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X, Files } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X, Files, LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 type DatasetType = '311' | '911' | 'business_licenses';
@@ -318,6 +319,113 @@ export default function DataUploadPage() {
           )}
         </CardContent>
       </Card>
+
+      <SourceFileUpload />
     </div>
+  );
+}
+
+/* ─── Source File Upload to Storage ─── */
+function SourceFileUpload() {
+  const [file, setFile] = useState<File | null>(null);
+  const [dataset, setDataset] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const DATASET_OPTIONS = [
+    { value: '311 Service Requests', label: '311 Service Requests' },
+    { value: '911 Emergency Calls', label: '911 Emergency Calls' },
+    { value: 'Business Licenses', label: 'Business Licenses' },
+  ];
+
+  const handleUpload = async () => {
+    if (!file || !dataset) {
+      toast.error('Select a file and dataset name');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${dataset.replace(/\s+/g, '_').toLowerCase()}/${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('datasets')
+        .upload(path, file, { upsert: true, contentType: 'text/csv' });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('datasets')
+        .getPublicUrl(path);
+
+      // Update all catalog rows for this dataset with the public URL
+      const { error: updateError } = await supabase
+        .from('dataset_catalog')
+        .update({ source_url: urlData.publicUrl })
+        .eq('name', dataset);
+
+      if (updateError) throw updateError;
+
+      toast.success(`"${file.name}" uploaded and linked to "${dataset}"`);
+      setFile(null);
+      setDataset('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <Card className="glass-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <LinkIcon className="h-5 w-5 text-primary" />
+          Link Source CSV to Dataset
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Upload a raw CSV file to cloud storage and link it as the downloadable source for a dataset.
+          This fixes broken "Source" links on the Overview page.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Select value={dataset} onValueChange={setDataset}>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder="Select dataset" />
+            </SelectTrigger>
+            <SelectContent>
+              {DATASET_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div
+            className="flex-1 border border-dashed border-border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => inputRef.current?.click()}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".csv"
+              onChange={e => setFile(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm text-muted-foreground truncate">
+              {file ? file.name : 'Choose CSV file…'}
+            </span>
+          </div>
+
+          <Button onClick={handleUpload} disabled={uploading || !file || !dataset}>
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+            Upload & Link
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
