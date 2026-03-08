@@ -14,6 +14,7 @@ import { DemoScenarios } from '@/components/DemoScenarios';
 import { AiInsightPanel } from '@/components/AiInsightPanel';
 import { AskYourCity } from '@/components/AskYourCity';
 import { ForecastSummarySection } from '@/components/ForecastSummarySection';
+import { StrategicActionsSection } from '@/components/StrategicActionsSection';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
