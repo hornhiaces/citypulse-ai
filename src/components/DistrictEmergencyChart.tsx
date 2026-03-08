@@ -12,7 +12,7 @@ export function DistrictEmergencyChart({ data }: DistrictEmergencyChartProps) {
     <div className="glass-card p-5 h-full flex flex-col">
       <h3 className="text-sm font-semibold text-foreground mb-1">Emergency Calls by District</h3>
       <p className="text-xs text-muted-foreground mb-4">30-day volume with month-over-month change</p>
-      <div className="h-56">
+      <div className="h-56 flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(222 30% 16%)" />
