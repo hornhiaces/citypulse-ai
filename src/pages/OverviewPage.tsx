@@ -13,6 +13,7 @@ import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useS
 import { DemoScenarios } from '@/components/DemoScenarios';
 import { AiInsightPanel } from '@/components/AiInsightPanel';
 import { AskYourCity } from '@/components/AskYourCity';
+import { ForecastSummarySection } from '@/components/ForecastSummarySection';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
@@ -85,6 +86,10 @@ export default function OverviewPage() {
         <div className="min-h-[280px]">
           <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} />
         </div>
+      </div>
+
+      <div className="mb-6">
+        <ForecastSummarySection />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
