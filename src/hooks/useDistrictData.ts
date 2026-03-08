@@ -71,3 +71,17 @@ export function useBusinessLicenses() {
     queryFn: () => fetchBusinessLicenses(),
   });
 }
+
+export function useBusinessTypeBreakdown() {
+  return useQuery({
+    queryKey: ['business-type-breakdown'],
+    queryFn: fetchBusinessTypeBreakdown,
+  });
+}
+
+export function useLicenseIssuanceTrends() {
+  return useQuery({
+    queryKey: ['license-issuance-trends'],
+    queryFn: fetchLicenseIssuanceTrends,
+  });
+}
