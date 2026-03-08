@@ -42,14 +42,13 @@ function CategoryBar({ cat, i, compact = false }: { cat: { category: string; cou
 export function CategoryBreakdown({ data }: CategoryBreakdownProps) {
   const categories = data || serviceRequestCategories;
   const [open, setOpen] = useState(false);
-  const top5 = categories.slice(0, 5);
 
   return (
     <>
       <div className="glass-card p-5 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground">311 Request Categories</h3>
-          {categories.length > 5 && (
+          {categories.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
@@ -61,13 +60,15 @@ export function CategoryBreakdown({ data }: CategoryBreakdownProps) {
             </Button>
           )}
         </div>
-        {top5.length === 0 ? (
+        {categories.length === 0 ? (
           <p className="text-sm text-muted-foreground">No category data available.</p>
         ) : (
-          <div className="space-y-3 flex-1">
-            {top5.map((cat, i) => (
-              <CategoryBar key={cat.category} cat={cat} i={i} />
-            ))}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="h-full overflow-y-auto space-y-2 pr-1">
+              {categories.map((cat, i) => (
+                <CategoryBar key={cat.category} cat={cat} i={i} />
+              ))}
+            </div>
           </div>
         )}
       </div>
