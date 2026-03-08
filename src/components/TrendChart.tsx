@@ -114,7 +114,19 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(value: string, index: number) => {
+                  const items = chartData as any[];
+                  const item = items[index];
+                  const years = new Set(items.map((d: any) => d.year).filter(Boolean));
+                  if (years.size > 1 && item?.year) return `${value} '${String(item.year).slice(-2)}`;
+                  return value;
+                }}
+              />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{

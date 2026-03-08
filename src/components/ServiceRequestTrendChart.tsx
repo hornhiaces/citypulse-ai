@@ -129,7 +129,18 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(value: string, index: number) => {
+                  const item = chartData[index] as any;
+                  const years = new Set(chartData.map((d: any) => d.year).filter(Boolean));
+                  if (years.size > 1 && item?.year) return `${value} '${String(item.year).slice(-2)}`;
+                  return value;
+                }}
+              />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{

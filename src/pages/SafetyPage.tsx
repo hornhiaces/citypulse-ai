@@ -58,12 +58,15 @@ export default function SafetyPage() {
   // Build trend data from live calls (months already normalized by service)
   const trendData = (() => {
     if (!emergencyCalls?.length) return undefined;
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const grouped: Record<string, number> = {};
+    const grouped: Record<string, { total: number; year: number; month: string }> = {};
     emergencyCalls.forEach(c => {
-      grouped[c.month] = (grouped[c.month] || 0) + (c.call_count || 0);
+      const key = `${c.year}-${c.month}`;
+      if (!grouped[key]) grouped[key] = { total: 0, year: c.year, month: c.month };
+      grouped[key].total += c.call_count || 0;
     });
-    return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
+    return Object.entries(grouped)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => ({ month: v.month, year: v.year, calls911: v.total }));
   })();
 
   const highRiskDistricts = districts.filter(d => d.publicSafetyPressure === 'HIGH');
