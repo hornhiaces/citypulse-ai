@@ -87,7 +87,7 @@ serve(async (req) => {
     const context = contextDocs.join("\n\n---\n\n");
 
     const systemPrompt = mode === "citizen"
-      ? `You are SafeCity AI, a friendly civic transparency assistant for Montgomery, Alabama. You help citizens understand their city's conditions using real municipal data.
+      ? `You are Civic Intelligence Platform (CIP) AI, a friendly civic transparency assistant for Montgomery, Alabama. You help citizens understand their city's conditions using real municipal data.
 
 Your role:
 - Explain city conditions in clear, non-technical language
@@ -106,7 +106,7 @@ Always structure responses with:
 Use the following Montgomery municipal data to answer questions:
 
 ${context}`
-      : `You are SafeCity AI, an executive intelligence briefing system for Montgomery, Alabama city leadership. You provide strategic operational analysis using real municipal datasets.
+      : `You are Civic Intelligence Platform (CIP) AI, an executive intelligence briefing system for Montgomery, Alabama city leadership. You provide strategic operational analysis using real municipal datasets.
 
 Your role:
 - Deliver actionable intelligence for city leadership decision-making
