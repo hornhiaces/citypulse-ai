@@ -18,6 +18,8 @@ const SLIDES = [
           <span>•</span>
           <span>GenAI Works Hackathon 2026</span>
         </div>
+        <p className="mt-4 text-sm text-foreground font-medium">Team-theGump</p>
+        <p className="text-xs text-muted-foreground">Larry Salinas · Kathiravan Kamatchi</p>
         <p className="mt-8 text-xs text-muted-foreground">city-pulse-aip.lovable.app</p>
       </div>
     ),

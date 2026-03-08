@@ -9,7 +9,7 @@ export default function SolutionPage() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center border-b border-border pb-4">
           <h1 className="text-3xl font-bold text-foreground tracking-tight">City Pulse AI</h1>
           <p className="text-base text-muted-foreground mt-1">AI-Powered Municipal Intelligence Platform — Montgomery, AL</p>
-          <p className="text-xs text-muted-foreground mt-1">GenAI Works Hackathon 2026 · Live at city-pulse-aip.lovable.app</p>
+          <p className="text-xs text-muted-foreground mt-1">GenAI Works Hackathon 2026 · <strong className="text-foreground">Team-theGump:</strong> Larry Salinas · Kathiravan Kamatchi</p>
         </motion.div>
 
         {/* Problem */}
