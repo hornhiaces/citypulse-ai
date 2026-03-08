@@ -82,7 +82,7 @@ export default function OverviewPage() {
            <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} showForecast={isLeadership} isLoading={ec911Loading} isError={ec911Error} />
          </div>
          <div className="min-h-[280px]">
-           <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} showForecast={isLeadership} isLoading={trends311Loading} isError={trends311Error} />
+           <ServiceRequestTrendChart data={trendData311Raw} isLoading={trends311Loading} isError={trends311Error} showForecast={isLeadership} />
          </div>
        </div>
 
