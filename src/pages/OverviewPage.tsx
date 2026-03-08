@@ -49,15 +49,15 @@ export default function OverviewPage() {
   // Build 911 trend data from emergency calls (already has normalized months)
   const trendData911 = (() => {
     if (!emergencyCalls?.length) return undefined;
-    const grouped: Record<string, { total: number; year: number }> = {};
+    const grouped: Record<string, { total: number; year: number; month: string }> = {};
     emergencyCalls.forEach(c => {
       const key = `${c.year}-${c.month}`;
-      if (!grouped[key]) grouped[key] = { total: 0, year: c.year };
+      if (!grouped[key]) grouped[key] = { total: 0, year: c.year, month: c.month };
       grouped[key].total += c.call_count || 0;
     });
     return Object.entries(grouped)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, v]) => ({ month: Object.entries(grouped).find(([, val]) => val === v)![0].split('-')[1], year: v.year, calls911: v.total }));
+      .map(([, v]) => ({ month: v.month, year: v.year, calls911: v.total }));
   })();
 
 
