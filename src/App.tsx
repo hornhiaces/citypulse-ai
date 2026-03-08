@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModeProvider } from "@/lib/modeContext";
 import { AppLayout } from "@/components/AppLayout";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import { testSupabaseConnection } from "@/lib/testSupabase";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -41,10 +42,18 @@ function PageLoader() {
   );
 }
 
+function DiagnosticInit() {
+  useEffect(() => {
+    testSupabaseConnection();
+  }, []);
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModeProvider>
+        <DiagnosticInit />
         <Toaster />
         <Sonner />
         <BrowserRouter>

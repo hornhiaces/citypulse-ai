@@ -11,6 +11,7 @@ export async function fetchEmergencyCalls(filters?: { district?: number; year?: 
   if (filters?.district) query = query.eq('district', filters.district);
   if (filters?.year) query = query.eq('year', filters.year);
   const { data, error } = await query.order('year').order('month');
+  console.log('📞 fetchEmergencyCalls:', { error: error?.message, rowCount: data?.length });
   if (error) throw error;
   return data;
 }

@@ -38,6 +38,7 @@ export async function fetchServiceRequestTrends() {
   const { data, error } = await supabase
     .from('service_requests_311')
     .select('created_date');
+  console.log('📋 fetchServiceRequestTrends:', { error: error?.message, rowCount: data?.length });
   if (error) throw error;
   if (!data?.length) return [];
 
