@@ -24,7 +24,7 @@ export function KpiCard({ data, index }: { data: KpiData; index: number }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
-      className="glass-card p-5 group hover:glow-border transition-all duration-300"
+      className="glass-card p-3 sm:p-5 group hover:glow-border transition-all duration-300"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="p-2 rounded-lg bg-primary/10">
