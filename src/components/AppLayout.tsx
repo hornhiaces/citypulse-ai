@@ -34,7 +34,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </button>
         <Link to="/" className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-sm">CIP AI</span>
+          <span className="font-semibold text-sm">City Pulse AI</span>
         </Link>
         <ModeToggle />
       </header>
