@@ -49,7 +49,7 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} isLoading={trendsLoading} isError={trendsError} />
+        <ServiceRequestTrendChart data={trendData311} isLoading={trendsLoading} isError={trendsError} />
         <CategoryBreakdown data={categoryData} />
       </div>
 
