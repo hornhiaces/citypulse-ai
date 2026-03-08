@@ -43,10 +43,10 @@ export function DistrictEmergencyChart({ data, isLoading, isError }: DistrictEme
         <div className="flex-1 min-h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.6} />
               <XAxis
                 dataKey="district"
-                tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 10, fill: 'hsl(var(--foreground))', opacity: 0.8 }}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
@@ -54,7 +54,7 @@ export function DistrictEmergencyChart({ data, isLoading, isError }: DistrictEme
                 textAnchor="end"
                 height={60}
               />
-              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--foreground))', opacity: 0.7 }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--popover))',

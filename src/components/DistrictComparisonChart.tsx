@@ -78,18 +78,21 @@ export function DistrictComparisonChart({ districts }: DistrictComparisonChartPr
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData}>
-              <PolarGrid stroke="hsl(var(--border))" strokeOpacity={0.4} />
+              <PolarGrid stroke="hsl(var(--border))" strokeOpacity={0.5} />
               <PolarAngleAxis
                 dataKey="dimension"
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                tick={{ fill: 'hsl(var(--foreground))', fontSize: 11, fontWeight: 500 }}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  fontSize: '11px',
+                  fontSize: '12px',
+                  color: 'hsl(var(--foreground))',
                 }}
+                labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}
+                itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
               />
               {selected.map((d, i) => (
                 <Radar
@@ -98,12 +101,12 @@ export function DistrictComparisonChart({ districts }: DistrictComparisonChartPr
                   dataKey={`D${d.district}`}
                   stroke={COLORS[i % COLORS.length]}
                   fill={COLORS[i % COLORS.length]}
-                  fillOpacity={0.12}
+                  fillOpacity={0.15}
                   strokeWidth={2}
                 />
               ))}
               <Legend
-                wrapperStyle={{ fontSize: '10px' }}
+                wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--foreground))' }}
               />
             </RadarChart>
           </ResponsiveContainer>

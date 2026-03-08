@@ -94,7 +94,7 @@ export function LicenseTrendChart({ data, isLoading }: LicenseTrendChartProps) {
               <Bar dataKey="newLicenses" fill="url(#grad-new)" radius={[4, 4, 0, 0]} stackId="stack" barSize={20} />
               <Line type="monotone" dataKey="total" stroke="hsl(38 92% 50%)" strokeWidth={2} dot={{ r: 2 }} />
               <Legend
-                wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '8px', color: 'hsl(var(--foreground))' }}
                 formatter={(value: string) => {
                   const labels: Record<string, string> = { newLicenses: 'New', renewals: 'Renewals', total: 'Total' };
                   return labels[value] || value;

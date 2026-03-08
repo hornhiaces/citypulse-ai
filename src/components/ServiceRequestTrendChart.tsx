@@ -175,7 +175,7 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                 </>
               )}
               <Legend
-                wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '8px', color: 'hsl(var(--foreground))' }}
                 formatter={(value: string) => {
                   const labels: Record<string, string> = {
                     resolved: 'Resolved',
