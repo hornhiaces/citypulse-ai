@@ -112,12 +112,14 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50">
-        <div className="w-4 h-0.5 rounded" style={{ backgroundColor: color }} />
-        <span className="text-[10px] text-muted-foreground">Actual</span>
-        <div className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: color }} />
-        <span className="text-[10px] text-muted-foreground">Forecast</span>
-      </div>
+      {showForecast && (
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50">
+          <div className="w-4 h-0.5 rounded" style={{ backgroundColor: color }} />
+          <span className="text-[10px] text-muted-foreground">Actual</span>
+          <div className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: color }} />
+          <span className="text-[10px] text-muted-foreground">Forecast</span>
+        </div>
+      )}
     </div>
   );
 }
