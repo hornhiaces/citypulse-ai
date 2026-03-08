@@ -171,7 +171,7 @@ export const BriefingPanel = forwardRef<BriefingPanelHandle>(function BriefingPa
   useImperativeHandle(ref, () => ({ sendMessage: handleSend }));
 
   return (
-    <div className="glass-card flex flex-col h-[600px]">
+    <div className="glass-card flex flex-col h-[calc(100vh-12rem)] sm:h-[600px]">
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (

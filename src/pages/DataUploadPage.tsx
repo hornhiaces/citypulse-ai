@@ -246,23 +246,23 @@ export default function DataUploadPage() {
             <div className="space-y-2">
               {files.map(fu => (
                 <div key={fu.id} className="border border-border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
                       {statusIcon(fu.status)}
-                      <span className="text-sm font-medium truncate">{fu.file.name}</span>
-                      <Badge variant="outline" className="text-xs shrink-0">
+                      <span className="text-sm font-medium truncate max-w-[120px] sm:max-w-none">{fu.file.name}</span>
+                      <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">
                         {(fu.file.size / (1024 * 1024)).toFixed(1)} MB
                       </Badge>
                       {fu.detectedType ? (
-                        <Badge variant={typeBadgeColor(fu.detectedType)} className="text-xs shrink-0">
+                        <Badge variant={typeBadgeColor(fu.detectedType)} className="text-[10px] sm:text-xs shrink-0">
                           {DATASET_LABELS[fu.detectedType]}
                         </Badge>
                       ) : fu.detectionDone ? (
-                        <Badge variant="outline" className="text-xs text-destructive border-destructive/30 shrink-0">
+                        <Badge variant="outline" className="text-[10px] sm:text-xs text-destructive border-destructive/30 shrink-0">
                           Unknown type
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-xs text-muted-foreground shrink-0">
+                        <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
                           Detecting...
                         </Badge>
                       )}

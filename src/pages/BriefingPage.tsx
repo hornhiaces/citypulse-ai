@@ -17,10 +17,10 @@ export default function BriefingPage() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 order-2 lg:order-1">
           <BriefingPanel ref={briefingRef} />
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 order-1 lg:order-2">
           <div className="glass-card p-4">
             <h3 className="text-xs font-semibold text-foreground mb-3">Suggested Questions</h3>
             <div className="space-y-2">

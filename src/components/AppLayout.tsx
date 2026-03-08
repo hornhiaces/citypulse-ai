@@ -100,7 +100,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main className="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
-        <div className="p-4 lg:p-6 max-w-[1400px] mx-auto">
+        <div className="p-3 sm:p-4 lg:p-6 max-w-[1400px] mx-auto">
           {children}
         </div>
       </main>

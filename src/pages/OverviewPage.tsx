@@ -66,7 +66,7 @@ export default function OverviewPage() {
         badge={isLeadership ? 'Command Center' : 'Live Data'}
       />
 
-      <div className={`grid gap-3 mb-6 ${isLeadership ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6' : 'grid-cols-2 lg:grid-cols-4'}`}>
+      <div className={`grid gap-3 mb-6 ${isLeadership ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
         {kpis.map((kpi, i) => (
           <KpiCard key={kpi.label} data={kpi} index={i} />
         ))}

@@ -21,7 +21,7 @@ export default function MapPage() {
         <div className="lg:col-span-2">
           <CityHeatmap districts={districts} />
         </div>
-        <div className="space-y-3 max-h-[700px] overflow-y-auto pr-1">
+        <div className="space-y-3 max-h-[50vh] lg:max-h-[700px] overflow-y-auto pr-1">
           <h3 className="text-sm font-semibold text-foreground">All Districts</h3>
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-44 rounded-xl" />)

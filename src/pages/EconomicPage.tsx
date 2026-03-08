@@ -67,8 +67,8 @@ export default function EconomicPage() {
         ) : (
           <div className="space-y-3">
             {topSectors.map((s, i) => (
-              <motion.div key={s.sector} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center gap-4">
-                <span className="text-xs text-muted-foreground w-36 truncate">{s.sector}</span>
+              <motion.div key={s.sector} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center gap-2 sm:gap-4">
+                <span className="text-xs text-muted-foreground w-24 sm:w-36 truncate shrink-0">{s.sector}</span>
                 <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}

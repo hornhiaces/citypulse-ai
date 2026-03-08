@@ -37,7 +37,7 @@ export function KpiCard({ data, index }: { data: KpiData; index: number }) {
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold tracking-tight text-foreground">{data.value}</p>
+      <p className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">{data.value}</p>
       <p className="text-xs text-muted-foreground mt-1">{data.label}</p>
     </motion.div>
   );
