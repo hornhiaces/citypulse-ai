@@ -32,7 +32,7 @@ export default function InfrastructurePage() {
     ];
   })();
 
-  const trendData = trendData311 && trendData311.length > 0 ? trendData311 : undefined;
+  
   const categoryData = stats?.categoryBreakdown;
   const stressedDistricts = districts.filter(d => d.infrastructureStress === 'HIGH');
 
