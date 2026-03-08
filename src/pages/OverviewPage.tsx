@@ -12,6 +12,7 @@ import { fetchRecommendations } from '@/services/recommendationService';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
 import { DemoScenarios } from '@/components/DemoScenarios';
 import { AiInsightPanel } from '@/components/AiInsightPanel';
+import { AskYourCity } from '@/components/AskYourCity';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
