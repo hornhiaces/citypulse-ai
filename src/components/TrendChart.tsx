@@ -102,11 +102,13 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
                 return [value, label];
               }}
             />
-            {forecastStart && (
+            {showForecast && forecastStart && (
               <ReferenceLine x={forecastStart} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeOpacity={0.5} />
             )}
             <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#gradient-${dataKey})`} strokeWidth={2} />
-            <Area type="monotone" dataKey={forecastKey} stroke={color} fill={`url(#gradient-${forecastKey})`} strokeWidth={2} strokeDasharray="6 3" connectNulls={false} />
+            {showForecast && (
+              <Area type="monotone" dataKey={forecastKey} stroke={color} fill={`url(#gradient-${forecastKey})`} strokeWidth={2} strokeDasharray="6 3" connectNulls={false} />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
