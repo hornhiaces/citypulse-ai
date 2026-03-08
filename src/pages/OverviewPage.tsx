@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
 import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
 import { DemoScenarios } from '@/components/DemoScenarios';
+import { AiInsightPanel } from '@/components/AiInsightPanel';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
