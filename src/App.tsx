@@ -17,6 +17,8 @@ const EconomicPage = lazy(() => import("./pages/EconomicPage"));
 const RecommendationsPage = lazy(() => import("./pages/RecommendationsPage"));
 const TransparencyPage = lazy(() => import("./pages/TransparencyPage"));
 const ROIPage = lazy(() => import("./pages/ROIPage"));
+const SolutionPage = lazy(() => import("./pages/SolutionPage"));
+const SlidesPage = lazy(() => import("./pages/SlidesPage"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
