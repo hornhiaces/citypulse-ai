@@ -9,6 +9,7 @@ interface TrendChartProps {
   description?: string;
   data?: Record<string, unknown>[];
   forecastMonths?: number;
+  showForecast?: boolean;
 }
 
 function computeForecast(data: Record<string, unknown>[], dataKey: string, months = 3) {
