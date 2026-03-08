@@ -16,6 +16,7 @@ import { AiInsightPanel } from '@/components/AiInsightPanel';
 import { AskYourCity } from '@/components/AskYourCity';
 import { ForecastSummarySection } from '@/components/ForecastSummarySection';
 import { StrategicActionsSection } from '@/components/StrategicActionsSection';
+import { DataSourcesPanel } from '@/components/DataSourcesPanel';
 
 export default function OverviewPage() {
   const { isLeadership } = useMode();
@@ -129,9 +130,14 @@ export default function OverviewPage() {
                ))}
              </div>
            </div>
-           <DemoScenarios />
-         </div>
+            <DemoScenarios />
+          </div>
        )}
+
+       {/* Data Sources — visible in both modes */}
+       <div className="mt-6">
+         <DataSourcesPanel />
+       </div>
     </>
   );
 }
