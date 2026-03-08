@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchDistrictScores } from '@/services/districtService';
 import { fetchServiceRequestStats, fetchServiceRequestTrends } from '@/services/serviceRequestService';
 import { fetchEmergencyCalls, fetchEmergencyCallsByDistrict } from '@/services/emergencyCallService';
-import { fetchBusinessLicenseStats, fetchBusinessLicenses } from '@/services/businessLicenseService';
+import { fetchBusinessLicenseStats, fetchBusinessLicenses, fetchBusinessTypeBreakdown, fetchLicenseIssuanceTrends } from '@/services/businessLicenseService';
 import { districtScores as fallbackDistricts } from '@/lib/mockData';
 import type { DistrictScore, ScoreLevel } from '@/lib/mockData';
 
@@ -69,5 +69,19 @@ export function useBusinessLicenses() {
   return useQuery({
     queryKey: ['business-licenses'],
     queryFn: () => fetchBusinessLicenses(),
+  });
+}
+
+export function useBusinessTypeBreakdown() {
+  return useQuery({
+    queryKey: ['business-type-breakdown'],
+    queryFn: fetchBusinessTypeBreakdown,
+  });
+}
+
+export function useLicenseIssuanceTrends() {
+  return useQuery({
+    queryKey: ['license-issuance-trends'],
+    queryFn: fetchLicenseIssuanceTrends,
   });
 }
