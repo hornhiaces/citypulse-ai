@@ -102,10 +102,19 @@ export default function EconomicPage() {
         </div>
       )}
 
-      {/* Leadership: ROI Quick Wins */}
+      {/* Leadership: Link to ROI page */}
       {isLeadership && (
         <div className="mb-6">
-          <EconomicROIPanel districts={districts} stats={stats} />
+          <Link
+            to="/roi"
+            className="glass-card p-4 flex items-center justify-between group hover:border-primary/30 transition-colors block"
+          >
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Quick Win ROI Estimates</h3>
+              <p className="text-xs text-muted-foreground">Data-driven revenue projections and investment priorities →</p>
+            </div>
+            <span className="text-xs font-medium text-primary group-hover:underline">View Full Analysis</span>
+          </Link>
         </div>
       )}
 
