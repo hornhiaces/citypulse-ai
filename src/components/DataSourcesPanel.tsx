@@ -94,41 +94,33 @@ export function DataSourcesPanel() {
                        Last updated: {lastIngested}
                      </span>
                    )}
-                   {ds.source_url && ds.source_url.endsWith('.csv') ? (
-                     <span className="flex items-center gap-2">
-                       <a
-                         href={ds.source_url}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="flex items-center gap-1 text-[10px] text-primary hover:underline"
-                       >
-                         <Eye className="h-2.5 w-2.5" />
-                         View
-                       </a>
-                       <a
-                         href={ds.source_url}
-                         download
-                         className="flex items-center gap-1 text-[10px] text-primary hover:underline"
-                       >
-                         <Download className="h-2.5 w-2.5" />
-                         Download CSV
-                       </a>
-                     </span>
-                   ) : ds.source_url ? (
-                     <a
-                       href={ds.source_url}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="flex items-center gap-1 text-[10px] text-primary hover:underline"
-                     >
-                       <ExternalLink className="h-2.5 w-2.5" />
-                       Source
-                     </a>
-                   ) : (
-                     <span className="flex items-center gap-1 text-[10px] text-muted-foreground italic">
-                       Source not available (file size limit)
-                     </span>
-                   )}
+                   {(() => {
+                     const sourceUrl = SOURCE_URLS[ds.name];
+                     if (sourceUrl && sourceUrl.endsWith('.csv')) {
+                       return (
+                         <span className="flex items-center gap-2">
+                           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+                             <Eye className="h-2.5 w-2.5" />View
+                           </a>
+                           <a href={sourceUrl} download className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+                             <Download className="h-2.5 w-2.5" />Download CSV
+                           </a>
+                         </span>
+                       );
+                     } else if (sourceUrl) {
+                       return (
+                         <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+                           <ExternalLink className="h-2.5 w-2.5" />Source
+                         </a>
+                       );
+                     } else {
+                       return (
+                         <span className="flex items-center gap-1 text-[10px] text-muted-foreground italic">
+                           Source not available (file size limit)
+                         </span>
+                       );
+                     }
+                   })()}
                 </div>
               </div>
             </motion.div>
