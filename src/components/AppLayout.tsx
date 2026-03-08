@@ -55,8 +55,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+          {navItems
+            .filter(item => !item.leadershipOnly || isLeadership)
+            .map((item) => {
             return (
               <Link
                 key={item.path}
