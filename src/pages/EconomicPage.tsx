@@ -4,6 +4,7 @@ import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { LicenseTrendChart } from '@/components/LicenseTrendChart';
 import { DistrictEconomicMatrix } from '@/components/DistrictEconomicMatrix';
 import { EconomicInsightPanel } from '@/components/EconomicInsightPanel';
+import { EconomicROIPanel } from '@/components/EconomicROIPanel';
 import { useMode } from '@/lib/modeContext';
 import {
   useDistrictScores,
