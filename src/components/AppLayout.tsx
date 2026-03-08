@@ -58,6 +58,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {navItems
             .filter(item => !item.leadershipOnly || isLeadership)
             .map((item) => {
+            const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
