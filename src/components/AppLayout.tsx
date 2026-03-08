@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Brain, Map, Shield, Wrench, DollarSign,
-  Lightbulb, Menu, X, Activity, Eye
+  Lightbulb, Menu, X, Activity, Eye, BadgeDollarSign
 } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 import { useMode } from '@/lib/modeContext';
@@ -15,6 +15,7 @@ const navItems = [
   { path: '/safety', label: 'Public Safety', icon: Shield },
   { path: '/infrastructure', label: 'Infrastructure', icon: Wrench },
   { path: '/economic', label: 'Economic Signals', icon: DollarSign },
+  { path: '/roi', label: 'ROI Quick Wins', icon: BadgeDollarSign, leadershipOnly: true },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
   { path: '/transparency', label: 'Transparency', icon: Eye },
 ];
@@ -54,7 +55,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
+          {navItems
+            .filter(item => !item.leadershipOnly || isLeadership)
+            .map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
