@@ -187,10 +187,14 @@ export type Database = {
       }
       dataset_catalog: {
         Row: {
+          completion_rate: number | null
           created_at: string
           description: string | null
+          error_details: string | null
           id: string
+          ingestion_source: string | null
           last_ingested_at: string | null
+          missing_rows: number | null
           name: string
           record_count: number | null
           source_url: string | null
@@ -198,10 +202,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          completion_rate?: number | null
           created_at?: string
           description?: string | null
+          error_details?: string | null
           id?: string
+          ingestion_source?: string | null
           last_ingested_at?: string | null
+          missing_rows?: number | null
           name: string
           record_count?: number | null
           source_url?: string | null
@@ -209,10 +217,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          completion_rate?: number | null
           created_at?: string
           description?: string | null
+          error_details?: string | null
           id?: string
+          ingestion_source?: string | null
           last_ingested_at?: string | null
+          missing_rows?: number | null
           name?: string
           record_count?: number | null
           source_url?: string | null
@@ -299,6 +311,78 @@ export type Database = {
           signal_level?: string | null
           signal_type?: string
           signal_value?: number
+        }
+        Relationships: []
+      }
+      ingestion_audit_log: {
+        Row: {
+          chunk_size: number | null
+          completed_at: string | null
+          completion_rate: number | null
+          created_at: string | null
+          dataset_name: string
+          duration_seconds: number | null
+          errors: string | null
+          failed_chunks: number | null
+          file_size_mb: number | null
+          filename: string
+          id: string
+          ingestion_method: string | null
+          inserted_rows: number
+          missing_rows: number | null
+          notes: string | null
+          started_at: string
+          status: string
+          total_chunks: number | null
+          total_rows: number
+          updated_at: string | null
+          user_ip_hash: string | null
+        }
+        Insert: {
+          chunk_size?: number | null
+          completed_at?: string | null
+          completion_rate?: number | null
+          created_at?: string | null
+          dataset_name: string
+          duration_seconds?: number | null
+          errors?: string | null
+          failed_chunks?: number | null
+          file_size_mb?: number | null
+          filename: string
+          id?: string
+          ingestion_method?: string | null
+          inserted_rows: number
+          missing_rows?: number | null
+          notes?: string | null
+          started_at?: string
+          status?: string
+          total_chunks?: number | null
+          total_rows: number
+          updated_at?: string | null
+          user_ip_hash?: string | null
+        }
+        Update: {
+          chunk_size?: number | null
+          completed_at?: string | null
+          completion_rate?: number | null
+          created_at?: string | null
+          dataset_name?: string
+          duration_seconds?: number | null
+          errors?: string | null
+          failed_chunks?: number | null
+          file_size_mb?: number | null
+          filename?: string
+          id?: string
+          ingestion_method?: string | null
+          inserted_rows?: number
+          missing_rows?: number | null
+          notes?: string | null
+          started_at?: string
+          status?: string
+          total_chunks?: number | null
+          total_rows?: number
+          updated_at?: string | null
+          user_ip_hash?: string | null
         }
         Relationships: []
       }
@@ -394,7 +478,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_data_quality: {
+        Row: {
+          dataset: string | null
+          location_coverage_pct: number | null
+          records_with_key: number | null
+          records_with_location: number | null
+          total_records: number | null
+          unique_keys: number | null
+        }
+        Relationships: []
+      }
+      vw_ingestion_summary: {
+        Row: {
+          avg_completion_rate: number | null
+          dataset_name: string | null
+          failed_ingestions: number | null
+          most_recent_ingest: string | null
+          partial_ingestions: number | null
+          successful_ingestions: number | null
+          total_attempts: number | null
+          total_missing_rows: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       match_documents: {
