@@ -27,6 +27,28 @@ function detectDataset(columns: string[]): string | null {
   return bestScore >= 2 ? bestMatch : null;
 }
 
+// Normalize month values to 3-letter abbreviations (Jan, Feb, Mar, ...)
+const MONTH_MAP: Record<string, string> = {
+  "1": "Jan", "01": "Jan", "jan": "Jan", "january": "Jan",
+  "2": "Feb", "02": "Feb", "feb": "Feb", "february": "Feb",
+  "3": "Mar", "03": "Mar", "mar": "Mar", "march": "Mar",
+  "4": "Apr", "04": "Apr", "apr": "Apr", "april": "Apr",
+  "5": "May", "05": "May", "may": "May",
+  "6": "Jun", "06": "Jun", "jun": "Jun", "june": "Jun",
+  "7": "Jul", "07": "Jul", "jul": "Jul", "july": "Jul",
+  "8": "Aug", "08": "Aug", "aug": "Aug", "august": "Aug",
+  "9": "Sep", "09": "Sep", "sep": "Sep", "september": "Sep",
+  "10": "Oct", "oct": "Oct", "october": "Oct",
+  "11": "Nov", "nov": "Nov", "november": "Nov",
+  "12": "Dec", "dec": "Dec", "december": "Dec",
+};
+
+function normalizeMonth(m: unknown): string {
+  if (!m) return "Jan";
+  const key = String(m).toLowerCase().trim();
+  return MONTH_MAP[key] || String(m).slice(0, 3).replace(/^(.)/, c => c.toUpperCase());
+}
+
 interface IngestPayload {
   dataset?: "311" | "911" | "business_licenses";
   columns?: string[];
@@ -68,8 +90,7 @@ serve(async (req) => {
       dataset = detected as "311" | "911" | "business_licenses";
     }
 
-    let inserted = 0;
-    let updated = 0;
+    let upserted = 0;
     const errors: string[] = [];
 
     if (dataset === "311") {
@@ -95,12 +116,12 @@ serve(async (req) => {
         .upsert(cleaned, { onConflict: "case_id", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
-      else inserted = data.length;
+      else upserted = data.length;
     }
 
     if (dataset === "911") {
       const cleaned = records.map((r: any) => ({
-        month: r.month || r.Month || r.MONTH,
+        month: normalizeMonth(r.month || r.Month || r.MONTH),
         year: parseInt(r.year || r.Year || r.YEAR),
         district: parseDistrict(r.district || r.District || r.DISTRICT),
         call_type: r.call_type || r.CallType || r.CALL_TYPE || "All",
@@ -117,7 +138,7 @@ serve(async (req) => {
         .upsert(cleaned, { onConflict: "month,year,district,call_type", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
-      else inserted = data.length;
+      else upserted = data.length;
     }
 
     if (dataset === "business_licenses") {
@@ -140,18 +161,19 @@ serve(async (req) => {
         .upsert(cleaned, { onConflict: "license_number", ignoreDuplicates: false })
         .select("id");
       if (error) errors.push(error.message);
-      else inserted = data.length;
+      else upserted = data.length;
     }
 
-    // Update dataset catalog
+    // Update dataset catalog — use upsert to handle missing rows,
+    // and pass this chunk's count so the frontend can accumulate totals
     const catalogName = dataset === "311" ? "311 Service Requests" : dataset === "911" ? "911 Emergency Calls" : "Business Licenses";
     await supabase
       .from("dataset_catalog")
-      .update({ record_count: inserted, last_ingested_at: new Date().toISOString(), status: errors.length ? "error" : "complete" })
+      .update({ last_ingested_at: new Date().toISOString(), status: errors.length ? "error" : "complete" })
       .eq("name", catalogName);
 
     return new Response(
-      JSON.stringify({ success: true, dataset, inserted, errors }),
+      JSON.stringify({ success: true, dataset, inserted: upserted, errors }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
@@ -165,7 +187,8 @@ serve(async (req) => {
 function normalizeStatus(s: string | undefined): string {
   if (!s) return "open";
   const lower = s.toLowerCase().trim();
-  if (lower.includes("resolve") || lower.includes("close") || lower.includes("complete")) return "resolved";
+  if (lower.includes("close")) return "closed";
+  if (lower.includes("resolve") || lower.includes("complete")) return "resolved";
   if (lower.includes("progress") || lower.includes("assign")) return "in_progress";
   return "open";
 }

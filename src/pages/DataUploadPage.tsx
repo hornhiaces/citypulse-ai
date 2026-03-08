@@ -150,20 +150,24 @@ export default function DataUploadPage() {
     const queued = files.filter(f => f.status === 'queued');
     if (!queued.length) { toast.error('No files to process'); return; }
 
+    // Warn about undetected files but process the rest
     const undetected = queued.filter(f => !f.detectedType);
+    const processable = queued.filter(f => f.detectedType);
     if (undetected.length) {
-      toast.error(`Cannot detect dataset type for: ${undetected.map(f => f.file.name).join(', ')}`);
-      return;
+      toast.warning(`Skipping ${undetected.length} file(s) with undetected type: ${undetected.map(f => f.file.name).join(', ')}`);
+      setFiles(prev => prev.map(f =>
+        undetected.some(u => u.id === f.id) ? { ...f, status: 'error' as const, errors: ['Could not detect dataset type from CSV headers'] } : f
+      ));
     }
+    if (!processable.length) { toast.error('No files with detectable dataset type'); return; }
 
     setIsProcessing(true);
-    for (const fu of queued) {
+    for (const fu of processable) {
       await processFile(fu);
     }
     setIsProcessing(false);
 
-    const doneFiles = files.filter(f => f.status === 'done' || queued.some(q => q.id === f.id));
-    toast.success(`Finished processing ${queued.length} file(s)`);
+    toast.success(`Finished processing ${processable.length} file(s)`);
   }, [files]);
 
   const statusIcon = (s: FileUpload['status']) => {

@@ -25,8 +25,22 @@ export default function SafetyPage() {
       ];
     }
 
-    const latestCalls = emergencyCalls.filter(c => c.month === 'Mar' && c.year === 2025);
-    const prevCalls = emergencyCalls.filter(c => c.month === 'Feb' && c.year === 2025);
+    // Dynamically find the most recent month/year in the data
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const sorted = [...emergencyCalls].sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year;
+      return monthOrder.indexOf(b.month) - monthOrder.indexOf(a.month);
+    });
+    const latestMonth = sorted[0]?.month;
+    const latestYear = sorted[0]?.year;
+
+    // Find the previous month
+    const latestMonthIdx = monthOrder.indexOf(latestMonth);
+    const prevMonth = latestMonthIdx > 0 ? monthOrder[latestMonthIdx - 1] : monthOrder[11];
+    const prevYear = latestMonthIdx > 0 ? latestYear : latestYear - 1;
+
+    const latestCalls = emergencyCalls.filter(c => c.month === latestMonth && c.year === latestYear);
+    const prevCalls = emergencyCalls.filter(c => c.month === prevMonth && c.year === prevYear);
     const totalCurrent = latestCalls.reduce((s, c) => s + (c.call_count || 0), 0);
     const totalPrev = prevCalls.reduce((s, c) => s + (c.call_count || 0), 0);
     const changePct = totalPrev ? Math.round(((totalCurrent - totalPrev) / totalPrev) * 100 * 10) / 10 : 0;
