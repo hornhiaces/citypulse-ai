@@ -22,7 +22,7 @@ interface FileUpload {
   errors: string[];
 }
 
-const CHUNK_SIZE = 500;
+const CHUNK_SIZE = 1000;
 
 const DATASET_LABELS: Record<DatasetType, string> = {
   '311': '311 Service Requests',

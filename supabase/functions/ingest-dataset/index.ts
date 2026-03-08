@@ -5,20 +5,28 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const ALLOWED_ORIGINS = [
   "https://citypulse-ai.vercel.app",
   "https://montgomery-safecity.gov",
-  "https://lovable.dev",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
 
+// Lovable sandbox/preview domains use subdomains like *.lovable.app and *.lovable.dev
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/.*\.lovable\.app$/,
+  /^https:\/\/.*\.lovable\.dev$/,
+  /^https:\/\/lovable\.dev$/,
+  /^https:\/\/lovable\.app$/,
+];
+
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
-    allowed === origin || (allowed.includes("*") && origin.includes(allowed.split("*")[0]))
+  const isAllowed = origin && (
+    ALLOWED_ORIGINS.includes(origin) ||
+    ALLOWED_ORIGIN_PATTERNS.some(pattern => pattern.test(origin))
   );
 
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin : "null",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Access-Control-Allow-Headers": "authorization, content-type, apikey, x-client-info",
     "Access-Control-Max-Age": "86400",
   };
 }
@@ -117,7 +125,7 @@ serve(async (req) => {
   try {
     // Check rate limiting
     const clientId = getClientId(req);
-    const rateLimit = checkRateLimit(clientId, 100, 3600000);
+    const rateLimit = checkRateLimit(clientId, 1000, 3600000);
 
     if (!rateLimit.allowed) {
       return new Response(
@@ -220,9 +228,11 @@ serve(async (req) => {
       }));
 
       // Deduplicate by case_id to avoid "cannot affect row a second time" error
-      const seen = new Set<string | null>();
+      // Skip null keys — PostgreSQL treats NULLs as distinct, so no conflict
+      const seen = new Set<string>();
       const deduped = cleaned.reverse().filter(r => {
         const key = r.case_id;
+        if (!key) return true; // keep all null-key rows
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -283,9 +293,11 @@ serve(async (req) => {
       }));
 
       // Deduplicate by license_number to avoid "cannot affect row a second time" error
-      const seen = new Set<string | null>();
+      // Skip null keys — PostgreSQL treats NULLs as distinct, so no conflict
+      const seen = new Set<string>();
       const deduped = cleaned.reverse().filter(r => {
         const key = r.license_number;
+        if (!key) return true; // keep all null-key rows
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
