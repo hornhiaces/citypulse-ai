@@ -243,6 +243,36 @@ export default function DataUploadPage() {
     await queryClient.invalidateQueries({ queryKey: ['business-license-stats'] });
     await queryClient.invalidateQueries({ queryKey: ['business-licenses'] });
 
+    // Log ingestion events to database for audit trail
+    for (const fu of processable) {
+      if (fu.totalRows > 0) {
+        const datasetLabels: Record<DatasetType, string> = {
+          '311': '311 Service Requests',
+          '911': '911 Emergency Calls',
+          'business_licenses': 'Business Licenses',
+        };
+
+        try {
+          await supabase.from('ingestion_audit_log').insert({
+            filename: fu.file.name,
+            dataset_name: datasetLabels[fu.detectedType || '311'],
+            file_size_mb: fu.file.size / (1024 * 1024),
+            total_rows: fu.totalRows,
+            inserted_rows: fu.insertedRows,
+            status: fu.status === 'done' ? (fu.completionRate >= 100 ? 'success' : 'success_partial') : 'error',
+            errors: fu.errors.length > 0 ? fu.errors.join('; ') : null,
+            failed_chunks: fu.errors.length,
+            chunk_size: 1000,
+            ingestion_method: 'frontend_csv_upload',
+            notes: fu.completionRate < 100 ? `Accepted with ${fu.completionRate.toFixed(2)}% completion rate` : null,
+            completed_at: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.error('[Ingest] Failed to log ingestion event:', err);
+        }
+      }
+    }
+
     const partialFiles = processable.filter(f => f.completionRate > 0 && f.completionRate < 100 && f.status === 'done');
     const message = partialFiles.length > 0
       ? `Finished processing ${processable.length} file(s) (${partialFiles.length} with >98% completion) - Refreshing dashboard...`
