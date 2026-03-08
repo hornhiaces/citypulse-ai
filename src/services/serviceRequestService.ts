@@ -93,10 +93,11 @@ export async function fetchServiceRequestTrends() {
     .slice(-12);
 
   return sorted.map(([key, counts]) => {
-    const [, monthIdx] = key.split('-');
+    const [yearStr, monthIdx] = key.split('-');
     const resolutionRate = counts.total > 0 ? Math.round((counts.resolved / counts.total) * 100) : 0;
     return {
       month: monthNames[parseInt(monthIdx, 10)],
+      year: parseInt(yearStr, 10),
       requests311: counts.total,
       resolved: counts.resolved,
       open: counts.open,

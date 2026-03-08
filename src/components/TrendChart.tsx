@@ -124,6 +124,10 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
                   fontSize: '12px',
                   color: 'hsl(var(--foreground))',
                 }}
+                labelFormatter={(label: string, payload: any[]) => {
+                  const year = payload?.[0]?.payload?.year;
+                  return year ? `${label} ${year}` : label;
+                }}
                 formatter={(value: number, name: string) => {
                   const label = name.includes('forecast') ? 'Forecast' : 'Actual';
                   return [value.toLocaleString(), label];

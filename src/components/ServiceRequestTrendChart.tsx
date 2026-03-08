@@ -139,6 +139,10 @@ export function ServiceRequestTrendChart({ data, isLoading, isError, showForecas
                   fontSize: '12px',
                   color: 'hsl(var(--foreground))',
                 }}
+                labelFormatter={(label: string, payload: any[]) => {
+                  const year = payload?.[0]?.payload?.year;
+                  return year ? `${label} ${year}` : label;
+                }}
                 formatter={(value: number, name: string) => {
                   const labels: Record<string, string> = {
                     resolved: 'Resolved',
