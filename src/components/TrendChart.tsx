@@ -9,6 +9,7 @@ interface TrendChartProps {
   description?: string;
   data?: Record<string, unknown>[];
   forecastMonths?: number;
+  showForecast?: boolean;
 }
 
 function computeForecast(data: Record<string, unknown>[], dataKey: string, months = 3) {
@@ -53,9 +54,10 @@ function computeForecast(data: Record<string, unknown>[], dataKey: string, month
   return { chartData: merged, forecastStart, changePercent };
 }
 
-export function TrendChart({ title, dataKey, color, description, data, forecastMonths = 3 }: TrendChartProps) {
+export function TrendChart({ title, dataKey, color, description, data, forecastMonths = 3, showForecast = false }: TrendChartProps) {
   const rawData = data || monthlyTrends;
-  const { chartData, forecastStart, changePercent } = computeForecast(rawData as Record<string, unknown>[], dataKey, forecastMonths);
+  const { chartData: forecastChartData, forecastStart, changePercent } = computeForecast(rawData as Record<string, unknown>[], dataKey, forecastMonths);
+  const chartData = showForecast ? forecastChartData : rawData;
   const forecastKey = `${dataKey}_forecast`;
   const isUp = changePercent > 0;
 
@@ -63,7 +65,7 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
     <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        {changePercent !== 0 && (
+        {showForecast && changePercent !== 0 && (
           <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${isUp ? 'bg-destructive/10 text-destructive' : 'bg-emerald-500/10 text-emerald-400'}`}>
             <TrendingUp className={`w-3 h-3 ${!isUp ? 'rotate-180' : ''}`} />
             <span>{isUp ? '+' : ''}{changePercent}% forecast</span>
@@ -100,20 +102,24 @@ export function TrendChart({ title, dataKey, color, description, data, forecastM
                 return [value, label];
               }}
             />
-            {forecastStart && (
+            {showForecast && forecastStart && (
               <ReferenceLine x={forecastStart} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeOpacity={0.5} />
             )}
             <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#gradient-${dataKey})`} strokeWidth={2} />
-            <Area type="monotone" dataKey={forecastKey} stroke={color} fill={`url(#gradient-${forecastKey})`} strokeWidth={2} strokeDasharray="6 3" connectNulls={false} />
+            {showForecast && (
+              <Area type="monotone" dataKey={forecastKey} stroke={color} fill={`url(#gradient-${forecastKey})`} strokeWidth={2} strokeDasharray="6 3" connectNulls={false} />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50">
-        <div className="w-4 h-0.5 rounded" style={{ backgroundColor: color }} />
-        <span className="text-[10px] text-muted-foreground">Actual</span>
-        <div className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: color }} />
-        <span className="text-[10px] text-muted-foreground">Forecast</span>
-      </div>
+      {showForecast && (
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50">
+          <div className="w-4 h-0.5 rounded" style={{ backgroundColor: color }} />
+          <span className="text-[10px] text-muted-foreground">Actual</span>
+          <div className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: color }} />
+          <span className="text-[10px] text-muted-foreground">Forecast</span>
+        </div>
+      )}
     </div>
   );
 }
