@@ -478,6 +478,14 @@ export type Database = {
       }
     }
     Views: {
+      vw_311_category_breakdown: {
+        Row: {
+          category: string | null
+          count: number | null
+          percentage: number | null
+        }
+        Relationships: []
+      }
       vw_311_monthly_trends: {
         Row: {
           month: string | null
@@ -486,6 +494,34 @@ export type Database = {
           requests_311: number | null
           resolved: number | null
           year: number | null
+        }
+        Relationships: []
+      }
+      vw_311_status_summary: {
+        Row: {
+          high_priority_count: number | null
+          in_progress_count: number | null
+          open_count: number | null
+          resolved_count: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      vw_business_license_stats: {
+        Row: {
+          active_count: number | null
+          expired_count: number | null
+          new_count: number | null
+          renew_count: number | null
+          suspended_count: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      vw_business_type_breakdown: {
+        Row: {
+          business_type: string | null
+          count: number | null
         }
         Relationships: []
       }
@@ -552,6 +588,17 @@ export type Database = {
           successful_ingestions: number | null
           total_attempts: number | null
           total_missing_rows: number | null
+        }
+        Relationships: []
+      }
+      vw_license_issuance_trends: {
+        Row: {
+          month: string | null
+          month_num: number | null
+          new_licenses: number | null
+          renewals: number | null
+          total: number | null
+          year: number | null
         }
         Relationships: []
       }
