@@ -3,6 +3,7 @@ import { KpiCard } from '@/components/KpiCard';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { RecommendationCard } from '@/components/RecommendationCard';
 import { TrendChart } from '@/components/TrendChart';
+import { ServiceRequestTrendChart } from '@/components/ServiceRequestTrendChart';
 import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { DistrictEmergencyChart } from '@/components/DistrictEmergencyChart';
 import { useMode } from '@/lib/modeContext';
@@ -54,8 +55,7 @@ export default function OverviewPage() {
     return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
-  // 311 trend data comes from the dedicated service now
-  const trendData311 = trendData311Raw && trendData311Raw.length > 0 ? trendData311Raw : undefined;
+
 
   return (
     <>
@@ -81,7 +81,7 @@ export default function OverviewPage() {
            <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} showForecast={isLeadership} isLoading={ec911Loading} isError={ec911Error} />
          </div>
          <div className="min-h-[280px]">
-           <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} showForecast={isLeadership} isLoading={trends311Loading} isError={trends311Error} />
+           <ServiceRequestTrendChart data={trendData311Raw} isLoading={trends311Loading} isError={trends311Error} showForecast={isLeadership} />
          </div>
        </div>
 

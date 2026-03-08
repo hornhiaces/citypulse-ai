@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/PageHeader';
 import { KpiCard } from '@/components/KpiCard';
 import { CategoryBreakdown } from '@/components/CategoryBreakdown';
-import { TrendChart } from '@/components/TrendChart';
+import { ServiceRequestTrendChart } from '@/components/ServiceRequestTrendChart';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { useMode } from '@/lib/modeContext';
 import { useDistrictScores, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
@@ -32,7 +32,7 @@ export default function InfrastructurePage() {
     ];
   })();
 
-  const trendData = trendData311 && trendData311.length > 0 ? trendData311 : undefined;
+  
   const categoryData = stats?.categoryBreakdown;
   const stressedDistricts = districts.filter(d => d.infrastructureStress === 'HIGH');
 
@@ -49,7 +49,7 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} isLoading={trendsLoading} isError={trendsError} />
+        <ServiceRequestTrendChart data={trendData311} isLoading={trendsLoading} isError={trendsError} />
         <CategoryBreakdown data={categoryData} />
       </div>
 
