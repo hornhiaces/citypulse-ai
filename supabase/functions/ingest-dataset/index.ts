@@ -311,12 +311,22 @@ serve(async (req) => {
       else upserted = data.length;
     }
 
-    // Update dataset catalog — use upsert to handle missing rows,
-    // and pass this chunk's count so the frontend can accumulate totals
+    // Update dataset catalog with final count
     const catalogName = dataset === "311" ? "311 Service Requests" : dataset === "911" ? "911 Emergency Calls" : "Business Licenses";
+    const tableName = dataset === "311" ? "service_requests_311" : dataset === "911" ? "calls_911_monthly" : "business_licenses";
+
+    // Get current record count from the table
+    const { count } = await supabase
+      .from(tableName)
+      .select("*", { count: "exact", head: true });
+
     await supabase
       .from("dataset_catalog")
-      .update({ last_ingested_at: new Date().toISOString(), status: errors.length ? "error" : "complete" })
+      .update({
+        last_ingested_at: new Date().toISOString(),
+        status: errors.length ? "error" : "complete",
+        record_count: count || 0,
+      })
       .eq("name", catalogName);
 
     return new Response(
