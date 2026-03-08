@@ -9,8 +9,11 @@ export async function fetchEmergencyCalls(filters?: { district?: number; year?: 
     if (filters?.year) query = query.eq('year', filters.year);
     const { data, error } = await query.order('year').order('month');
     console.log('📞 fetchEmergencyCalls:', { error: error?.message, rowCount: data?.length });
+    if (error) throw error;
     if (data?.length) return data;
+    console.log('⚠️ No data returned from calls_911_monthly, using hardcoded');
   } catch (e) {
+    console.log('⚠️ fetchEmergencyCalls error:', e instanceof Error ? e.message : String(e));
     console.log('⚠️ Using hardcoded data for emergency calls');
   }
   return hardcodedEmergencyCalls;
@@ -26,7 +29,10 @@ export async function fetchEmergencyCallsByDistrict() {
       .limit(50);
 
     if (latestErr) throw latestErr;
-    if (!latest?.length) return hardcodedEmergencyCallsByDistrict;
+    if (!latest?.length) {
+      console.log('⚠️ No data in calls_911_monthly, using hardcoded');
+      return hardcodedEmergencyCallsByDistrict;
+    }
 
     // Sort by year desc then month desc to find the true latest period
     const sorted = latest.sort((a, b) => {
@@ -44,13 +50,16 @@ export async function fetchEmergencyCallsByDistrict() {
       .order('district');
     if (error) throw error;
     if (data?.length) {
+      console.log('📍 Returning live district data:', { month: latestMonth, year: latestYear, districts: data.length });
       return data.map(d => ({
         district: `D${d.district}`,
         calls: d.call_count,
         change: d.change_pct ?? 0,
       }));
     }
+    console.log('⚠️ No district data for latest period, using hardcoded');
   } catch (e) {
+    console.log('⚠️ fetchEmergencyCallsByDistrict error:', e instanceof Error ? e.message : String(e));
     console.log('⚠️ Using hardcoded data for emergency calls by district');
   }
   return hardcodedEmergencyCallsByDistrict;

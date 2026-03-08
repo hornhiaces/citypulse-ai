@@ -54,7 +54,10 @@ export async function fetchServiceRequestTrends() {
       .select('created_date');
     console.log('📋 fetchServiceRequestTrends:', { error: error?.message, rowCount: data?.length });
     if (error) throw error;
-    if (!data?.length) return hardcodedServiceRequestTrends;
+    if (!data?.length) {
+      console.log('⚠️ No data in service_requests_311, using hardcoded');
+      return hardcodedServiceRequestTrends;
+    }
 
     // Group by month and count
     const monthMap: Record<string, number> = {};
@@ -77,8 +80,13 @@ export async function fetchServiceRequestTrends() {
       .filter(m => monthMap[m])
       .map(m => ({ month: m, requests311: monthMap[m] || 0 }));
 
-    if (trends.length) return trends;
+    if (trends.length) {
+      console.log('📈 Returning live trend data:', { months: trends.length, totalRequests: trends.reduce((sum, t) => sum + t.requests311, 0) });
+      return trends;
+    }
+    console.log('⚠️ No trends found after aggregation, using hardcoded');
   } catch (e) {
+    console.log('⚠️ fetchServiceRequestTrends error:', e instanceof Error ? e.message : String(e));
     console.log('⚠️ Using hardcoded data for service request trends');
   }
   return hardcodedServiceRequestTrends;
