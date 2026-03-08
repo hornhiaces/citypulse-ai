@@ -19,7 +19,7 @@ export default function InfrastructurePage() {
       return [
         { label: 'Active 311 Requests', value: '—', change: 0, trend: 'stable' as const, icon: 'clipboard' },
         { label: 'Resolution Rate', value: '—', change: 0, trend: 'stable' as const, icon: 'check' },
-        { label: 'High Priority', value: '—', change: 0, trend: 'stable' as const, icon: 'alert' },
+        { label: 'In Progress', value: '—', change: 0, trend: 'stable' as const, icon: 'alert' },
         { label: 'Open Requests', value: '—', change: 0, trend: 'stable' as const, icon: 'clipboard' },
       ];
     }
