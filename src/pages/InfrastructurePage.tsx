@@ -4,7 +4,7 @@ import { CategoryBreakdown } from '@/components/CategoryBreakdown';
 import { TrendChart } from '@/components/TrendChart';
 import { DistrictScoreCard } from '@/components/DistrictScoreCard';
 import { useMode } from '@/lib/modeContext';
-import { useDistrictScores, useServiceRequestStats, useEmergencyCalls } from '@/hooks/useDistrictData';
+import { useDistrictScores, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
 import type { KpiData } from '@/lib/mockData';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -12,7 +12,7 @@ export default function InfrastructurePage() {
   const { isLeadership } = useMode();
   const { districts, isLoading: districtsLoading } = useDistrictScores();
   const { data: stats } = useServiceRequestStats();
-  const { data: emergencyCalls } = useEmergencyCalls();
+  const { data: trendData } = useServiceRequestTrends();
 
   const infraKpis: KpiData[] = (() => {
     if (!stats) {
@@ -30,14 +30,6 @@ export default function InfrastructurePage() {
       { label: 'High Priority', value: stats.highPriority.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'alert' },
       { label: 'Open Requests', value: stats.open.toLocaleString(), change: 0, trend: 'stable' as const, icon: 'clipboard' },
     ];
-  })();
-
-  // Build 311 trend data - aggregate by month from service requests
-  const trendData = (() => {
-    if (!stats) return undefined;
-    // Group service requests by approximate month (using created_date if available)
-    // For now, show empty state since we don't have monthly aggregation in service_requests_311
-    return undefined;
   })();
 
   const categoryData = stats?.categoryBreakdown;

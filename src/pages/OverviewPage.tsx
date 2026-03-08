@@ -9,7 +9,7 @@ import { useMode } from '@/lib/modeContext';
 import { executiveKpis, citizenKpis, recommendations as fallbackRecs } from '@/lib/mockData';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecommendations } from '@/services/recommendationService';
-import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats } from '@/hooks/useDistrictData';
+import { useDistrictScores, useEmergencyCalls, useEmergencyCallsByDistrict, useServiceRequestStats, useServiceRequestTrends } from '@/hooks/useDistrictData';
 import { DemoScenarios } from '@/components/DemoScenarios';
 
 export default function OverviewPage() {
@@ -19,6 +19,7 @@ export default function OverviewPage() {
   const { data: emergencyCalls } = useEmergencyCalls();
   const { data: districtCalls } = useEmergencyCallsByDistrict();
   const { data: requestStats } = useServiceRequestStats();
+  const { data: requestTrends } = useServiceRequestTrends();
 
   const { data: dbRecs } = useQuery({
     queryKey: ['recommendations'],
@@ -49,11 +50,8 @@ export default function OverviewPage() {
     return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
-  // 311 trend data requires monthly aggregation of service_requests_311 table
-  // Currently service_requests_311 has raw events without monthly grouping
-  // TODO: Create DB view for monthly 311 aggregation or add to service layer
-  // For now, return undefined to show empty state instead of fake 911 data
-  const trendData311 = undefined;
+  // 311 trend data from live service requests (aggregated by month)
+  const trendData311 = requestTrends;
 
   return (
     <>
