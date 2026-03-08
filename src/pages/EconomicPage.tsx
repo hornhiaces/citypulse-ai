@@ -123,7 +123,7 @@ export default function EconomicPage() {
         <LicenseTrendChart data={issuanceTrends} isLoading={trendsLoading} />
 
         {/* Business Type Donut */}
-        <div className="glass-card p-5 flex flex-col">
+        <div className="glass-card p-5 flex flex-col overflow-visible">
           <h3 className="text-sm font-semibold text-foreground mb-1">Business Sector Distribution</h3>
           <p className="text-xs text-muted-foreground mb-3">Top sectors by active license count</p>
           {typesLoading ? (
@@ -133,8 +133,8 @@ export default function EconomicPage() {
           ) : pieData.length === 0 ? (
             <p className="text-sm text-muted-foreground flex-1 flex items-center justify-center">No data available</p>
           ) : (
-            <div className="flex-1 min-h-0 flex items-center">
-              <div className="w-1/2 h-48">
+            <div className="flex-1 min-h-0 flex items-center overflow-visible">
+              <div className="w-1/2 h-48 overflow-visible">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -146,19 +146,28 @@ export default function EconomicPage() {
                       innerRadius={40}
                       outerRadius={70}
                       paddingAngle={2}
+                      label={false}
                     >
                       {pieData.map((_, i) => (
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip
+                      wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
+                        backgroundColor: 'hsl(var(--popover))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
-                        fontSize: '11px',
+                        fontSize: '12px',
                         color: 'hsl(var(--foreground))',
+                        padding: '8px 12px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                        maxWidth: '280px',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
                       }}
+                      labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600, marginBottom: '4px' }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
                       formatter={(value: number, name: string, entry: any) => [
                         value.toLocaleString(),
                         entry.payload.fullName || name,
