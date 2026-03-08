@@ -102,6 +102,13 @@ export default function EconomicPage() {
         </div>
       )}
 
+      {/* Leadership: ROI Quick Wins */}
+      {isLeadership && (
+        <div className="mb-6">
+          <EconomicROIPanel districts={districts} stats={stats} />
+        </div>
+      )}
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <LicenseTrendChart data={issuanceTrends} isLoading={trendsLoading} />
