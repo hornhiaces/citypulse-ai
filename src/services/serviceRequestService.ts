@@ -11,45 +11,34 @@ export async function fetchServiceRequests(filters?: { district?: number; status
 }
 
 export async function fetchServiceRequestStats() {
-  // Use multiple targeted queries instead of fetching all 177K rows
-  const [totalRes, statusRes, priorityRes, categoryRes] = await Promise.all([
-    supabase.from('service_requests_311').select('*', { count: 'exact', head: true }),
-    supabase.from('service_requests_311').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-    supabase.from('service_requests_311').select('*', { count: 'exact', head: true }).eq('priority', 'high'),
-    // Fetch categories – limited to 1000 but gives us top categories
-    supabase.from('service_requests_311').select('category').limit(1000),
+  // Single query to pre-aggregated view instead of 5+ round-trips
+  const [statsRes, categoryRes] = await Promise.all([
+    supabase.from('vw_311_status_summary' as any).select('*').limit(1),
+    supabase.from('vw_311_category_breakdown' as any).select('category, count, percentage'),
   ]);
 
-  const total = totalRes.count ?? 0;
-  const open = statusRes.count ?? 0;
+  if (statsRes.error) throw statsRes.error;
+  if (categoryRes.error) throw categoryRes.error;
 
-  // Get resolved count
-  const resolvedRes = await supabase.from('service_requests_311').select('*', { count: 'exact', head: true }).eq('status', 'resolved');
-  const resolved = resolvedRes.count ?? 0;
-  const inProgress = total - open - resolved;
-  const highPriority = priorityRes.count ?? 0;
+  const s = (statsRes.data as any[])?.[0] || {};
+  const categoryBreakdown = ((categoryRes.data as any[]) || []).map((r: any) => ({
+    category: r.category,
+    count: Number(r.count),
+    percentage: Number(r.percentage),
+  }));
 
-  // For category breakdown, use a broader sample
-  const categories: Record<string, number> = {};
-  if (categoryRes.data) {
-    categoryRes.data.forEach((r: any) => {
-      categories[r.category] = (categories[r.category] || 0) + 1;
-    });
-  }
-  const sampleTotal = categoryRes.data?.length || 1;
-  const categoryBreakdown = Object.entries(categories)
-    .map(([category, count]) => ({
-      category,
-      count: Math.round((count / sampleTotal) * total), // extrapolate to full dataset
-      percentage: Math.round((count / sampleTotal) * 1000) / 10,
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  return { total, open, resolved, inProgress, highPriority, categoryBreakdown };
+  return {
+    total: Number(s.total) || 0,
+    open: Number(s.open_count) || 0,
+    resolved: Number(s.resolved_count) || 0,
+    inProgress: Number(s.in_progress_count) || 0,
+    highPriority: Number(s.high_priority_count) || 0,
+    categoryBreakdown,
+  };
 }
 
 export async function fetchServiceRequestTrends() {
-  // Use pre-aggregated DB view instead of fetching 178K rows client-side
+  // Single query to pre-aggregated DB view
   const { data, error } = await supabase
     .from('vw_311_monthly_trends' as any)
     .select('month, year, month_num, requests_311, resolved, open')
@@ -63,7 +52,6 @@ export async function fetchServiceRequestTrends() {
 
   if (!data || data.length === 0) return [];
 
-  // Take last 12 months
   const rows = (data as any[]).slice(-12);
 
   return rows.map((r: any) => {

@@ -5,7 +5,6 @@ const MONTH_ABBR: Record<string, string> = {
   '4 - April': 'Apr', '5 - May': 'May', '6 - June': 'Jun',
   '7 - July': 'Jul', '8 - August': 'Aug', '9 - September': 'Sep',
   '10 - October': 'Oct', '11 - November': 'Nov', '12 - December': 'Dec',
-  // Also handle if already short
   'Jan': 'Jan', 'Feb': 'Feb', 'Mar': 'Mar', 'Apr': 'Apr', 'May': 'May',
   'Jun': 'Jun', 'Jul': 'Jul', 'Aug': 'Aug', 'Sep': 'Sep', 'Oct': 'Oct',
   'Nov': 'Nov', 'Dec': 'Dec',
@@ -19,45 +18,43 @@ export async function fetchEmergencyCalls(filters?: { district?: number; year?: 
   let query = supabase.from('calls_911_monthly').select('*');
   if (filters?.district) query = query.eq('district', filters.district);
   if (filters?.year) query = query.eq('year', filters.year);
-  const { data, error } = await query.order('year').order('month');
+  const { data, error } = await query.order('year').order('month').limit(1000);
   if (error) throw error;
-  // Normalize month format and return
   return (data || []).map(d => ({ ...d, month: normalizeMonth(d.month) }));
 }
 
 export async function fetchEmergencyCallsByDistrict() {
-  // 911 data has null districts, so use district_signals for emergency demand
-  const { data: signals, error: sigError } = await supabase
-    .from('district_signals')
-    .select('district, signal_value')
-    .eq('signal_type', 'emergency_demand')
-    .order('district');
+  // Parallel fetch: signals + district names in one go
+  const [signalsRes, scoresRes] = await Promise.all([
+    supabase
+      .from('district_signals')
+      .select('district, signal_value')
+      .eq('signal_type', 'emergency_demand')
+      .order('district'),
+    supabase
+      .from('district_scores')
+      .select('district, district_name')
+      .order('district'),
+  ]);
 
-  if (sigError) throw sigError;
-  if (!signals?.length) return [];
-
-  // Also get district scores for total call context
-  const { data: scores } = await supabase
-    .from('district_scores')
-    .select('district, district_name, overall_risk_score')
-    .order('district');
+  if (signalsRes.error) throw signalsRes.error;
+  const signals = signalsRes.data || [];
+  if (!signals.length) return [];
 
   const nameMap: Record<number, string> = {};
-  (scores || []).forEach(s => { nameMap[s.district] = s.district_name; });
+  (scoresRes.data || []).forEach(s => { nameMap[s.district] = s.district_name; });
 
-  // Get latest month total calls to compute proportional distribution
+  // Use signal_value as weight to distribute proportionally
+  const totalWeight = signals.reduce((sum, s) => sum + Math.max(1, Math.abs(s.signal_value) + 10), 0);
+  // Estimate monthly total from latest 911 row (single lightweight query)
   const { data: latestCalls } = await supabase
     .from('calls_911_monthly')
-    .select('call_count, month, year')
-    .eq('call_type', 'Emergency')
+    .select('call_count')
     .order('year', { ascending: false })
     .order('month', { ascending: false })
     .limit(1);
 
   const monthlyTotal = latestCalls?.[0]?.call_count || 10000;
-
-  // Distribute calls proportionally using signal_value as weight
-  const totalWeight = signals.reduce((sum, s) => sum + Math.max(1, Math.abs(s.signal_value) + 10), 0);
 
   return signals.map(s => {
     const weight = Math.max(1, Math.abs(s.signal_value) + 10);
