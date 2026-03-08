@@ -21,53 +21,59 @@ export function mapDbDistricts(dbDistricts: any[]): DistrictScore[] {
 }
 
 export function useDistrictScores() {
-  const { data: dbDistricts, isLoading } = useQuery({
+  const { data: dbDistricts, isLoading, error } = useQuery({
     queryKey: ['district-scores'],
     queryFn: fetchDistrictScores,
   });
 
   const districts = dbDistricts?.length ? mapDbDistricts(dbDistricts) : fallbackDistricts;
-  return { districts, isLoading };
+  return { districts, isLoading, error };
 }
 
 export function useServiceRequestStats() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['service-request-stats'],
     queryFn: fetchServiceRequestStats,
   });
+  return { ...query, data: query.data || null };
 }
 
 export function useEmergencyCalls() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['emergency-calls'],
     queryFn: () => fetchEmergencyCalls(),
   });
+  return { ...query, data: query.data || null };
 }
 
 export function useEmergencyCallsByDistrict() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['emergency-calls-by-district'],
     queryFn: fetchEmergencyCallsByDistrict,
   });
+  return { ...query, data: query.data || null };
 }
 
 export function useBusinessLicenseStats() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['business-license-stats'],
     queryFn: fetchBusinessLicenseStats,
   });
+  return { ...query, data: query.data || null };
 }
 
 export function useBusinessLicenses() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['business-licenses'],
     queryFn: () => fetchBusinessLicenses(),
   });
+  return { ...query, data: query.data || null };
 }
 
 export function useServiceRequestTrends() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['service-request-trends'],
     queryFn: fetchServiceRequestTrends,
   });
+  return { ...query, data: query.data || null };
 }

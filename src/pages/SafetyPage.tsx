@@ -84,7 +84,7 @@ export default function SafetyPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Emergency Call Volume Trend" dataKey="calls911" color="hsl(350 72% 55%)" data={trendData} />
+        <TrendChart title="Emergency Call Volume Trend" dataKey="calls911" color="hsl(350 72% 55%)" data={trendData} isLoading={callsLoading} />
         <DistrictEmergencyChart data={districtCalls} />
       </div>
 

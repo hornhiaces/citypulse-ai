@@ -25,7 +25,7 @@ export default function TransparencyPage() {
   const { isLeadership } = useMode();
   const { districts } = useDistrictScores();
   const { data: stats311 } = useServiceRequestStats();
-  const { data: emergencyCalls } = useEmergencyCalls();
+  const { data: emergencyCalls, isLoading: callsLoading, error: callsError } = useEmergencyCalls();
   const { data: bizStats } = useBusinessLicenseStats();
 
   const transparencyKpis: KpiData[] = [
@@ -104,7 +104,7 @@ export default function TransparencyPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Emergency Call Volume" dataKey="calls911" color="hsl(350 72% 55%)" data={trendData} />
+        <TrendChart title="Emergency Call Volume" dataKey="calls911" color="hsl(350 72% 55%)" data={trendData} isLoading={callsLoading} error={callsError} />
         <CategoryBreakdown data={stats311?.categoryBreakdown} />
       </div>
 

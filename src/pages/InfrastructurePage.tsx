@@ -11,8 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function InfrastructurePage() {
   const { isLeadership } = useMode();
   const { districts, isLoading: districtsLoading } = useDistrictScores();
-  const { data: stats } = useServiceRequestStats();
-  const { data: trendData } = useServiceRequestTrends();
+  const { data: stats, isLoading: statsLoading } = useServiceRequestStats();
+  const { data: trendData, isLoading: trendsLoading, error: trendsError } = useServiceRequestTrends();
 
   const infraKpis: KpiData[] = (() => {
     if (!stats) {
@@ -49,7 +49,7 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} />
+        <TrendChart title="Service Request Volume" dataKey="requests311" color="hsl(245 58% 60%)" data={trendData} isLoading={trendsLoading} error={trendsError} />
         <CategoryBreakdown data={categoryData} />
       </div>
 

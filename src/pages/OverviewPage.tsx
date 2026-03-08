@@ -15,11 +15,11 @@ import { DemoScenarios } from '@/components/DemoScenarios';
 export default function OverviewPage() {
   const { isLeadership } = useMode();
   const kpis = isLeadership ? executiveKpis : citizenKpis;
-  const { districts } = useDistrictScores();
-  const { data: emergencyCalls } = useEmergencyCalls();
-  const { data: districtCalls } = useEmergencyCallsByDistrict();
-  const { data: requestStats } = useServiceRequestStats();
-  const { data: requestTrends } = useServiceRequestTrends();
+  const { districts, error: districtError } = useDistrictScores();
+  const { data: emergencyCalls, isLoading: emergencyLoading, error: emergencyError } = useEmergencyCalls();
+  const { data: districtCalls, isLoading: districtCallsLoading } = useEmergencyCallsByDistrict();
+  const { data: requestStats, isLoading: statsLoading } = useServiceRequestStats();
+  const { data: requestTrends, isLoading: trendsLoading, error: trendsError } = useServiceRequestTrends();
 
   const { data: dbRecs } = useQuery({
     queryKey: ['recommendations'],
@@ -68,8 +68,8 @@ export default function OverviewPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} />
-        <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} />
+        <TrendChart title={isLeadership ? '911 Emergency Call Volume' : 'Emergency Call Trends'} dataKey="calls911" color="hsl(350 72% 55%)" description="Monthly emergency call volume across Montgomery" data={trendData911} isLoading={emergencyLoading} error={emergencyError} />
+        <TrendChart title={isLeadership ? '311 Service Request Volume' : 'Community Issue Reports'} dataKey="requests311" color="hsl(245 58% 60%)" description="Monthly service request submissions" data={trendData311} isLoading={trendsLoading} error={trendsError} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">

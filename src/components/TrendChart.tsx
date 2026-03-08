@@ -7,22 +7,36 @@ interface TrendChartProps {
   color: string;
   description?: string;
   data?: Record<string, unknown>[];
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
-export function TrendChart({ title, dataKey, color, description, data }: TrendChartProps) {
+export function TrendChart({ title, dataKey, color, description, data, isLoading, error }: TrendChartProps) {
   const chartData = data ?? monthlyTrends;
   const isEmpty = data && data.length === 0;
+  const showMockData = !data;
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
       {description && <p className="text-xs text-muted-foreground mb-4">{description}</p>}
-      {isEmpty ? (
+      {isLoading ? (
+        <div className="h-48 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">Loading chart data...</p>
+        </div>
+      ) : error ? (
+        <div className="h-48 flex items-center justify-center">
+          <p className="text-sm text-red-500">Error loading data: {error.message}</p>
+        </div>
+      ) : isEmpty ? (
         <div className="h-48 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No data available for this period</p>
         </div>
       ) : (
       <div className="h-48">
+        {showMockData && (
+          <p className="text-xs text-amber-600 mb-2">📊 Showing sample data (live data loading...)</p>
+        )}
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
