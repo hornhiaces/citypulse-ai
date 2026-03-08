@@ -55,8 +55,7 @@ export default function OverviewPage() {
     return monthOrder.filter(m => grouped[m] !== undefined).map(m => ({ month: m, calls911: grouped[m] || 0 }));
   })();
 
-  // 311 trend data comes from the dedicated service now
-  const trendData311 = trendData311Raw && trendData311Raw.length > 0 ? trendData311Raw : undefined;
+
 
   return (
     <>
