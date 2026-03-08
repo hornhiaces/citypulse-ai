@@ -21,6 +21,18 @@ export function TrendChart({ title, dataKey, color, description, data, isLoading
   const chartData = hasLiveData ? data : monthlyTrends;
   const showMockData = isUndefinedData || isEmptyData;
 
+  // DEBUG: Log rendering state
+  console.log(`📊 TrendChart "${title}":`, {
+    hasLiveData,
+    isEmptyData,
+    isUndefinedData,
+    isLoading,
+    error: error?.message,
+    dataLength: Array.isArray(data) ? data.length : 'not-array',
+    chartDataLength: chartData?.length,
+    showMockData,
+  });
+
   return (
     <div className="glass-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
