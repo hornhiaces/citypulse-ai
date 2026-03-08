@@ -478,6 +478,17 @@ export type Database = {
       }
     }
     Views: {
+      vw_311_monthly_trends: {
+        Row: {
+          month: string | null
+          month_num: number | null
+          open: number | null
+          requests_311: number | null
+          resolved: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
       vw_data_quality: {
         Row: {
           dataset: string | null
