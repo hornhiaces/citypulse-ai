@@ -90,7 +90,8 @@ export default function SolutionPage() {
         <div className="text-center border-t border-border pt-3">
           <p className="text-xs text-muted-foreground">
             <strong className="text-foreground">Live Demo:</strong> city-pulse-aip.lovable.app · 
-            <strong className="text-foreground ml-2">GitHub:</strong> <a href="https://github.com/hornhiaces/citypulse-ai" target="_blank" rel="noopener noreferrer" className="hover:underline">https://github.com/hornhiaces/citypulse-ai</a>
+            <strong className="text-foreground ml-2">GitHub:</strong> <a href="https://github.com/hornhiaces/citypulse-ai" target="_blank" rel="noopener noreferrer" className="hover:underline">https://github.com/hornhiaces/citypulse-ai</a> ·
+            <strong className="text-foreground ml-2">Pitch Video:</strong> <a href="https://www.loom.com/share/4460cfc186dd440381df0b60f09af0db" target="_blank" rel="noopener noreferrer" className="hover:underline">https://www.loom.com/share/4460cfc186dd440381df0b60f09af0db</a>
           </p>
         </div>
       </div>
