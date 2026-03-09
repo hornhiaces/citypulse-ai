@@ -75,10 +75,10 @@ export default function SolutionPage() {
 
         {/* Tech Stack */}
         <section>
-          <h2 className="text-lg font-bold text-foreground mb-2">🛠️ Technology (Sponsored Tech Highlighted)</h2>
+          <h2 className="text-lg font-bold text-foreground mb-2">🛠️ Technology</h2>
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-primary/15 text-primary border border-primary/30 font-semibold">🏆 Supabase (PostgreSQL + Edge Functions + pgvector)</span>
-            <span className="px-2.5 py-1 rounded-full bg-primary/15 text-primary border border-primary/30 font-semibold">🏆 Google Gemini Flash (AI Reasoning)</span>
+            <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">Supabase (PostgreSQL + Edge Functions + pgvector)</span>
+            <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">Google Gemini Flash (AI Reasoning)</span>
             <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">React 18 + TypeScript</span>
             <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">Tailwind CSS + shadcn/ui</span>
             <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">Recharts + Framer Motion</span>
