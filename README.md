@@ -151,13 +151,12 @@ User Query → ai-briefing (Edge Fn) → Embed Query → Vector Search
 | **Charts** | Recharts | Data visualization & trend analysis |
 | **Animation** | Framer Motion | Smooth transitions & micro-interactions |
 | **State** | React Query (TanStack) | Server state with 5-min cache |
-| **🏆 Backend** | **Supabase** (PostgreSQL) | Database, auth, edge functions, storage |
-| **🏆 Vector DB** | **Supabase pgvector** | Embedding storage & similarity search |
-| **🏆 AI Reasoning** | **Google Gemini Flash** | Streaming intelligence briefings |
+| **Backend** | **Supabase** (PostgreSQL) | Database, auth, edge functions, storage |
+| **Vector DB** | **Supabase pgvector** | Embedding storage & similarity search |
+| **AI Reasoning** | **Google Gemini Flash** | Streaming intelligence briefings |
 | **Embeddings** | OpenAI text-embedding-3-small | Document vectorization for RAG |
 | **Edge Runtime** | Deno (Supabase Functions) | Serverless compute for all backend logic |
 
-> 🏆 = Sponsored technology used for bonus points
 
 ---
 
